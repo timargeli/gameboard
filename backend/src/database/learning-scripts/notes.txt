@@ -1,0 +1,33 @@
+https://builtin.com/data-science/postgresql-in-array
+
+-- remove element from array
+
+UPDATE
+  shopping_cart
+SET
+  products = array_remove(products, 'product_e')
+WHERE cart_id = 1;
+SELECT
+  *
+FROM
+  shopping_cart
+ORDER BY cart_id;
+
+-- update by appending and prepending
+UPDATE
+  shopping_cart
+SET
+  products = ARRAY_APPEND(products, 'product_x')
+WHERE
+  cart_id = 1;
+UPDATE 
+  shopping_cart
+SET
+  products = ARRAY_PREPEND('product_x', products)
+WHERE
+  cart_id = 2;
+SELECT
+  *
+FROM
+  shopping_cart
+ORDER BY cart_id;
