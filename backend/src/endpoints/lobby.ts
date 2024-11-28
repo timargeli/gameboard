@@ -50,7 +50,8 @@ export const lobbyEndpoints: Endpoint[] = [
       try {
         const { lobbyId } = req.body
 
-        //TODO self id
+        // TODO self id
+        // TODO user already in validation
         const selfUserId = 1
 
         const lobby = await getLobby(lobbyId)
@@ -103,6 +104,8 @@ export const lobbyEndpoints: Endpoint[] = [
         const lobby = await getLobby(lobbyId)
 
         let boardGameId = -1
+
+        // TODO !! player count min_player validation
 
         // Create the specific boardgame
         switch (lobby.game_name) {

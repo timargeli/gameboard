@@ -4,10 +4,12 @@ import {
   kd_kingdomino_dominoTable,
   kd_playerTable,
 } from '../../../database/database'
-import { getDomino } from '../../../database/utils'
+import { endGame, getDomino } from '../../../database/utils'
 import { Endpoint } from '../../../types'
+import { getEndgameResults } from '../game'
 import { chooseDomino, draw, getTurn } from '../kingdomino'
 import { KingdominoMap } from '../kingdomino/kingdomino-map'
+import { getGameId } from '../kingdomino/utils'
 
 const basePath = '/domino'
 
@@ -25,6 +27,7 @@ export const dominoEndpoints: Endpoint[] = [
           throw new Error('PlayerId megadása kötelező')
         }
 
+        //TODO !! validation, a drawnDomino tényleg saját kingdominoban van? placere szintén
         await chooseDomino(drawnDominoId, playerId)
 
         res.status(201).json({ message: 'Dominó kiválasztása sikerült' })
@@ -41,16 +44,13 @@ export const dominoEndpoints: Endpoint[] = [
     handler: async (req, res) => {
       try {
         // TODO ! code cleanup, mi ez a hányás
-        // TODO place trash
-        const { drawnDominoId, playerId, x, y, rot } = req.body
+        // TODO !! validation, ez a dominó jön beépítésre? getturn visszatérése bővítés
+        const { drawnDominoId, playerId, x, y, rot, inTrash } = req.body
         if (!drawnDominoId) {
           throw new Error('Dominó megadása kötelező')
         }
         if (!playerId) {
           throw new Error('PlayerId megadása kötelező')
-        }
-        if (isNaN(x) || isNaN(y) || isNaN(rot)) {
-          throw new Error('helyzethez x, y, rot megadása kötelező')
         }
         const drawnDomino = await kd_kingdomino_dominoTable(db).findOne({ id: drawnDominoId })
         if (!drawnDomino) {
@@ -74,38 +74,56 @@ export const dominoEndpoints: Endpoint[] = [
         if (turn.action !== 'place') {
           throw new Error('Most nem lehet dominót lerakni')
         }
-
         const kingdominoMap = new KingdominoMap()
         await kingdominoMap.loadAndBuild(player.kingdom)
-        const toBePlaced = {
-          kingdom_id: player.kingdom,
-          domino_id: drawnDomino.domino_id,
-          x,
-          y,
-          rot,
+        // Kidobjuk a dominót, az építős kód ilyenkor nem kell
+        if (!inTrash) {
+          // Beépítés
+          if (isNaN(x) || isNaN(y) || isNaN(rot)) {
+            throw new Error('helyzethez x, y, rot megadása kötelező')
+          }
+
+          const toBePlaced = {
+            kingdom_id: player.kingdom,
+            domino_id: drawnDomino.domino_id,
+            x,
+            y,
+            rot,
+          }
+          const domino = await getDomino(drawnDomino.domino_id)
+          // egy kis bűvészkedés, ez a fgv úgy se használja az id-t TODO proper type
+          kingdominoMap.validateDominoPlacing({
+            ...toBePlaced,
+            ...domino,
+            id: -1,
+          })
+
+          const [placed] = await kd_kingdom_dominoTable(db).insert(toBePlaced)
         }
-        const domino = await getDomino(drawnDomino.domino_id)
-        // egy kis bűvészkedés, ez a fgv úgy se használja az id-t TODO proper type
-        kingdominoMap.validateDominoPlacing({
-          ...toBePlaced,
-          ...domino,
-          id: -1,
-        })
 
-        const [placed] = await kd_kingdom_dominoTable(db).insert(toBePlaced)
-
-        // Töröljük a kingdominobol, már a kingdomba van beépítve
+        // Töröljük a kingdominobol, már a kingdomba van beépítve VAGY ki van dobva
         await kd_kingdomino_dominoTable(db).delete({ id: drawnDominoId })
 
         const drawnDominos = await kd_kingdomino_dominoTable(db)
           .find({ kingdomino_id: drawnDomino.kingdomino_id })
           .all()
         // Összes maradék dominót már választotta valaki -> húzunk újat
-        if (!drawnDominos.some((dd) => !!dd.chosen_by_player)) {
+        if (drawnDominos.every((dd) => !!dd.chosen_by_player)) {
           await draw(drawnDomino.kingdomino_id)
-          // Elfogyott a deck is, nem volt mit húzni
+
+          // Elfogyott az összes drawnDomino + deck is, nem volt mit húzni -> endgame
+          const drawnDominos = await kd_kingdomino_dominoTable(db)
+            .find({ kingdomino_id: drawnDomino.kingdomino_id })
+            .all()
           if (!drawnDominos.length) {
-            // TODO !!! end game logika, statek lobby state, game state?
+            const gameId = await getGameId(drawnDomino.kingdomino_id)
+            await endGame(gameId)
+            // TODO jobb endgame results
+            const results = await getEndgameResults(drawnDomino.kingdomino_id)
+            res
+              .status(201)
+              .json({ message: 'Utolsó dominó beépítése sikerült, a játék véget ért', results: results })
+            return
           }
         }
 
@@ -115,7 +133,9 @@ export const dominoEndpoints: Endpoint[] = [
         // temporary, prints map to console
         kingdominoMap.printMap()
 
-        res.status(201).json({ message: 'Dominó beépítése sikerült', points: points, placedDomino: placed })
+        res
+          .status(201)
+          .json({ message: inTrash ? 'Dominó kukába helyezve' : 'Dominó beépítése sikerült', points: points })
       } catch (error) {
         console.log('Error building domino')
         console.log(error)

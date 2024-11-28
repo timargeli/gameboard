@@ -17,11 +17,10 @@ export const kingdomEndpoints: Endpoint[] = [
         const kingdomMap = new KingdominoMap()
         const points = await kingdomMap.loadAndBuild(kingdomId)
         kingdomMap.printMap()
-        console.log(kingdomMap.territories)
 
         res.status(201).json({ message: 'Kingdom pontszámítás sikerült', points: points })
       } catch (error) {
-        console.log('')
+        console.log('Error calculating points for kingdom')
         console.log(error)
         res
           .status(500)

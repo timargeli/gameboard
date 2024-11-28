@@ -1,5 +1,6 @@
+import { GameState } from '../../types'
 import { game_optionsTable, db, kingdomino_optionsTable, lobbyTable, kd_dominoTable } from '../database'
-import { KdDomino, Lobby } from '../generated'
+import { Game, KdDomino, Lobby } from '../generated'
 
 export const getGameOptions = async (gameOptionsId?: number | null) => {
   if (!gameOptionsId) {
@@ -45,10 +46,13 @@ export const getDomino = async (dominoId?: KdDomino['value'] | null) => {
   return domino
 }
 
-//TODO lobbystate
-export const setLobbyState = async (lobbyId: Lobby['id'], state: any) => {
-  if (!lobbyId) {
-    throw new Error('Dominó ID megadása kötelező')
+export const endGame = async (gameId?: Game['id'] | null) => {
+  if (!gameId) {
+    throw new Error('gameId megadása kötelező')
   }
-  const lobby = await lobbyTable(db).update({ id: lobbyId }, { state: state })
+  // TODO egyéb ending logika
+  const res = await lobbyTable(db).update({ game: gameId }, { state: GameState.ended })
+  if (!res.length) {
+    throw new Error('Nincs ilyen gameId-jú lobby')
+  }
 }

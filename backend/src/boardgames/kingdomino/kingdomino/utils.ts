@@ -1,4 +1,10 @@
-import { kingdominoTable, db, kingdomino_optionsTable } from '../../../database/database'
+import {
+  kingdominoTable,
+  db,
+  kingdomino_optionsTable,
+  boardgameTable,
+  gameTable,
+} from '../../../database/database'
 import { Kingdomino } from '../../../database/generated'
 import { Cell, CellType } from '../types'
 import { PlacedDominoJoined } from './types'
@@ -78,4 +84,19 @@ export const getKingdominoOptions = async (kingdominoId: Kingdomino['id'] | null
     throw new Error('Nincs kingdomino-hoz tartozó options. kingdomino id: ' + kingdomino.id)
   }
   return kingdominoOptions
+}
+
+export const getGameId = async (kingdominoId?: Kingdomino['id'] | null) => {
+  if (!kingdominoId) {
+    throw new Error('kingdominoId megadása kötelező')
+  }
+  const boardGame = await boardgameTable(db).findOne({ kingdomino: kingdominoId })
+  if (!boardGame) {
+    throw new Error('Nincs a megadott kingdominó idhoz boardgame ' + kingdominoId)
+  }
+  const game = await gameTable(db).findOne({ boardgame: boardGame.id })
+  if (!game) {
+    throw new Error('Nincs a megadott kingdominó idhoz game ' + kingdominoId)
+  }
+  return game.id
 }

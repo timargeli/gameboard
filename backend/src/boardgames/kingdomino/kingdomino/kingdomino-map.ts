@@ -1,4 +1,4 @@
-import { db, kd_kingdomTable, sql } from '../../../database/database'
+import { db, kd_kingdomTable, kd_playerTable, sql } from '../../../database/database'
 import { KdKingdom } from '../../../database/generated'
 import { Cell, CellType } from '../types'
 import { PlacedDominoJoined, Territory } from './types'
@@ -30,13 +30,6 @@ export class KingdominoMap {
     }
     const kingdominoOptions = await getKingdominoOptions(kd.kingdomino_id)
 
-    // kinullázzunk mindent, ha nem null
-    if (!this.sideSize) {
-      // TODO check kel ez ide
-      this.points = 0
-      this.territories = []
-    }
-
     // TODO ! options on de több mint két játékos? createnel?
     this.sideSize = kingdominoOptions.big_kingdom_enabled ? 7 : 5
 
@@ -51,7 +44,9 @@ export class KingdominoMap {
 
   async loadAndBuild(kingdom: KdKingdom | KdKingdom['id']) {
     const pDominos = await this.loadData(kingdom)
-    return this.build(pDominos)
+    this.build(pDominos)
+    await updatePlayerPoints(typeof kingdom === 'number' ? kingdom : kingdom.id, this.points)
+    return this.points
   }
 
   build(pDominos: PlacedDominoJoined[]) {
@@ -67,6 +62,8 @@ export class KingdominoMap {
 
     // Felépítjük a territorykat
     this.buildTerritories()
+
+    //TODO !! bónuszpontok
 
     // visszatérünk a pontszámmal
     return this.points
@@ -260,4 +257,14 @@ const cellTypeToChars = (cellType: CellType | undefined) => {
     default:
       return ' '
   }
+}
+const updatePlayerPoints = async (kingdomId: KdKingdom['id'] | null, newPoints: number) => {
+  if (!kingdomId) {
+    throw new Error('kingdomId megadása kötelező')
+  }
+  const player = await kd_playerTable(db).findOne({ kingdom: kingdomId })
+  if (!player) {
+    throw new Error('Nincs player a kingdomhoz ' + kingdomId)
+  }
+  await kd_playerTable(db).update({ id: player.id }, { points: newPoints })
 }

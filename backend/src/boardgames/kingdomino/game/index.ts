@@ -5,7 +5,7 @@ import {
   kd_playerTable,
   kingdominoTable,
 } from '../../../database/database'
-import { Boardgame, KingdominoOptions, Lobby } from '../../../database/generated'
+import { Boardgame, Kingdomino, KingdominoOptions, Lobby } from '../../../database/generated'
 import { getGameOptions } from '../../../database/utils'
 import { draw } from '../kingdomino'
 import { colors } from '../types'
@@ -105,4 +105,22 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
     console.log(error)
   }
   return -1
+}
+
+export const getEndgameResults = async (kingdominoId: Kingdomino['id'] | null) => {
+  if (!kingdominoId) {
+    throw new Error('kingdomoni Id endgameresulthoz kötelező')
+  }
+  const kingdoms = await kd_kingdomTable(db).find({ kingdomino_id: kingdominoId }).all()
+  if (!kingdoms.length) {
+    throw new Error('Nincsenek kingdomok a kingdominóhoz')
+  }
+  const players = await kd_playerTable(db)
+    .bulkFind({
+      whereColumnNames: ['kingdom'],
+      whereConditions: kingdoms.map((k) => ({ kingdom: k.id })),
+    })
+    .all()
+
+  return players.sort((p1, p2) => p2.points - p1.points)
 }
