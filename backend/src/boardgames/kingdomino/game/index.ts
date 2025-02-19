@@ -24,6 +24,7 @@ export const createAndInitBoardGame = async (lobby: Lobby) => {
   return await initBoardGame(lobby, kingdominoOptions)
 }
 
+// Létrehozza a boardGame-t és a kingdominohoz szükséges dolgokat, pl deck, játékosok, kingdomok
 const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions) => {
   try {
     if (!lobby.players?.length) {
@@ -33,8 +34,9 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
     const deckSize = lobby.players.length * 12 * (isBigMap ? 2 : 1)
     // create deck, 1-48 ig array, randomizaljuk, vesszük utsó decksize elemét
     const deck = [...Array(48).keys()]
-      .map((i) => i + 1)
-      .sort(() => Math.random() - 0.5)
+      .map((i) => ({ value: i + 1, random: Math.random() }))
+      .sort((a, b) => b.random - a.random)
+      .map((a) => a.value)
       .slice(-deckSize)
 
     const kdKingdomsRaw: BulkInsertKDKingdomParameters[] = []
@@ -107,6 +109,7 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
   return -1
 }
 
+// Visszaadja a megadott kingomdinohoz tartozó játékosokat pontszámuk szerint csökkenő sorrendben
 export const getEndgameResults = async (kingdominoId: Kingdomino['id'] | null) => {
   if (!kingdominoId) {
     throw new Error('kingdomoni Id endgameresulthoz kötelező')

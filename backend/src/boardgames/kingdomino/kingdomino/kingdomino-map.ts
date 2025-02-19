@@ -1,14 +1,16 @@
 import { db, kd_kingdomTable, kd_playerTable, sql } from '../../../database/database'
-import { KdKingdom } from '../../../database/generated'
+import { KdKingdom, KingdominoOptions } from '../../../database/generated'
 import { Cell, CellType } from '../types'
 import { PlacedDominoJoined, Territory } from './types'
 import { createCellData, getKingdominoOptions } from './utils'
 
+// A térkép tárolásáért, számításáért felelős osztály
 export class KingdominoMap {
   map: Cell[][]
   points: number
   territories: Territory[]
   sideSize: number
+  kingdominoOptions: KingdominoOptions | null
 
   constructor() {
     this.map = Array.from({ length: 13 }, () => new Array(13).fill(null))
@@ -21,17 +23,19 @@ export class KingdominoMap {
     this.points = 0
     this.territories = []
     this.sideSize = 0
+    this.kingdominoOptions = null
   }
 
+  // Kingdom vagy kingdom id alapján lekéri az összes lerakott dominót, és visszatér velük
   async loadData(kingdom: KdKingdom | KdKingdom['id']) {
     const kd = typeof kingdom === 'number' ? await kd_kingdomTable(db).findOne({ id: kingdom }) : kingdom
     if (!kd) {
       throw new Error('Nem sikerült kingdomot id alapján megtalálni')
     }
-    const kingdominoOptions = await getKingdominoOptions(kd.kingdomino_id)
+    this.kingdominoOptions = await getKingdominoOptions(kd.kingdomino_id)
 
     // TODO ! options on de több mint két játékos? createnel?
-    this.sideSize = kingdominoOptions.big_kingdom_enabled ? 7 : 5
+    this.sideSize = this.kingdominoOptions.big_kingdom_enabled ? 7 : 5
 
     const pDominos = (await db.query(sql`
       SELECT * FROM kd_kingdom_domino kd
@@ -42,6 +46,8 @@ export class KingdominoMap {
     return pDominos
   }
 
+  // Kingdom vagy kingdom id alapján lekéri, felépíti, pontszámítja az adott kingdomot
+  // és beupdateli a playerének pontszámát
   async loadAndBuild(kingdom: KdKingdom | KdKingdom['id']) {
     const pDominos = await this.loadData(kingdom)
     this.build(pDominos)
@@ -49,26 +55,39 @@ export class KingdominoMap {
     return this.points
   }
 
+  // Térkép felépítése
   build(pDominos: PlacedDominoJoined[]) {
     if (!pDominos.length) {
       return this.points
     }
-    // Feltételezzük, hogy helyesek a dominók; feltöltjük a mapot
+    // Feltételezzük, hogy helyesek a dominók, feltöltjük a mapot
     pDominos.forEach((pdom) => {
       const { c1, c2 } = createCellData(pdom)
       this.map[c1.i][c1.j] = c1
       this.map[c2.i][c2.j] = c2
     })
 
-    // Felépítjük a territorykat
+    // Felépítjük a territorykat és kiszámítjuk a pontszámot
     this.buildTerritories()
 
-    //TODO !! bónuszpontok
+    // Befejezett királyságért kapható bónuszpont
+    if (this.kingdominoOptions?.complete_bonus && pDominos.length === (this.sideSize === 7 ? 24 : 12)) {
+      this.points += 5
+    }
+    // Középen lévő kastélyért kapható bónuszpont
+    if (this.kingdominoOptions?.middle_bonus) {
+      const border = this.getKingdomBorder()
+      //TODO only add point if in endgame(?)
+      if (border.maxI === -border.minI && border.maxJ === -border.minJ) {
+        this.points += 5
+      }
+    }
 
     // visszatérünk a pontszámmal
     return this.points
   }
 
+  // Összefüggő területek kiszámítása
   buildTerritories() {
     this.points = 0
     this.territories = []
@@ -84,6 +103,7 @@ export class KingdominoMap {
     })
   }
 
+  // Cella beillesztése a területekbe
   mergeCellIntoTerritories(cell: NonNullable<Cell>) {
     const typeNeighbours = this.findNeigboursWithSameType(cell)
     const nTers: Territory[] = []
@@ -119,6 +139,7 @@ export class KingdominoMap {
     }
   }
 
+  // Megkeresi egy cella azonos típusú szomszédait
   findNeigboursWithSameType(cell: NonNullable<Cell>) {
     const typeNeighbours: NonNullable<Cell>[] = []
     // Elég fel meg balra checkolni a szomszédokat, onnan jöttünk
@@ -133,6 +154,7 @@ export class KingdominoMap {
     return typeNeighbours
   }
 
+  // Visszaadja a cellát az i j koordon, vagy nullt, ha nem a pályán vagyunk
   getCell(i: number, j: number) {
     if (i < 0 || i > 12 || j < 0 || j > 12) {
       return null
@@ -141,6 +163,7 @@ export class KingdominoMap {
     return this.map[i][j]
   }
 
+  // Ellenőrzi, hogy lerakható-e a kapott dominó
   validateDominoPlacing(pDom: PlacedDominoJoined) {
     const { c1, c2 } = createCellData(pDom)
     const cells: NonNullable<Cell>[] = [c1, c2]
@@ -181,6 +204,7 @@ export class KingdominoMap {
     }
   }
 
+  // Szomszédos cellák lekérdezése
   getNeighbourCells(cell: NonNullable<Cell>): NonNullable<Cell>[] {
     const nCells: Cell[] = []
     nCells.push(this.getCell(cell.i + 1, cell.j))
@@ -189,6 +213,8 @@ export class KingdominoMap {
     nCells.push(this.getCell(cell.i, cell.j + 1))
     return nCells.filter((c) => !!c)
   }
+
+  // Kingdom határait adja vissza
   getKingdomBorder() {
     let minI = 12,
       maxI = 0,
@@ -221,14 +247,14 @@ export class KingdominoMap {
     }
   }
 
-  // Temporary
+  // Temporary, térkép rajzolás console-ra
   printMap() {
     let map = ''
     const border = this.getKingdomBorder()
     for (let i = border.minI; i <= border.maxI; i++) {
       for (let j = border.minJ; j <= border.maxJ; j++) {
         const cell = this.map[i][j]
-        map += ` ${cellTypeToChars(cell?.type)}${cell?.crowns || 0} `
+        map += ` ${cellTypeToChars(cell?.type)}${cell?.crowns || ' '} `
       }
       map += '\n'
     }
@@ -258,6 +284,8 @@ const cellTypeToChars = (cellType: CellType | undefined) => {
       return ' '
   }
 }
+
+// Befrissíti a kapott kingdomhoz tartozó játékos pontszámát az átadott pontszámmal
 const updatePlayerPoints = async (kingdomId: KdKingdom['id'] | null, newPoints: number) => {
   if (!kingdomId) {
     throw new Error('kingdomId megadása kötelező')

@@ -103,9 +103,11 @@ export const lobbyEndpoints: Endpoint[] = [
         const { lobbyId } = req.body
         const lobby = await getLobby(lobbyId)
 
-        let boardGameId = -1
+        if ((lobby.players?.length || 0) < lobby.min_players) {
+          throw new Error('Nincs elegendő játékos a lobbyban')
+        }
 
-        // TODO !! player count min_player validation
+        let boardGameId = -1
 
         // Create the specific boardgame
         switch (lobby.game_name) {

@@ -9,6 +9,7 @@ import { Kingdomino } from '../../../database/generated'
 import { Cell, CellType } from '../types'
 import { PlacedDominoJoined } from './types'
 
+// Egy dominóból két cellát számol, forgatás és pozicó alapján
 export const createCellData = (pdom: PlacedDominoJoined) => {
   const posToInd = (pos: { x: number; y: number }) => {
     return {
