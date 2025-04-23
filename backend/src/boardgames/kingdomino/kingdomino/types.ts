@@ -8,6 +8,13 @@ export type BulkInsertKDKingdominoDomino = {
   parity: boolean
 }
 
+export type Topdeck = {
+  value: number & { readonly __brand?: 'kd_domino_value' }
+  parity: boolean
+  color: string
+  id: number & { readonly __brand?: 'kd_kingdomino_domino_id' }
+}
+
 export type PlacedDominoJoined = {
   // Domino
   img: string | null

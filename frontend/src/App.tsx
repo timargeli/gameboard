@@ -2,7 +2,8 @@ import React from 'react'
 import logo from './logo.svg'
 import './App.css'
 import { useEffect, useState } from 'react'
-import { KingdomMap } from './boardgames/kingdomino/map'
+import { KingdomMap } from './boardgames/kingdomino/kingdom-map'
+import { Topdecks } from './boardgames/kingdomino/topdeck/topdecks'
 //import BackendURL from '../../shared/src/env'
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
         background: '#eaeaea', // csak hogy lásd a középre igazítást
       }}
     >
+      <Topdecks kingdominoId={2} />
       <KingdomMap kingdomId={1} />
     </div>
   )

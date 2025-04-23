@@ -29,6 +29,13 @@ export type PlacedDominoJoined = {
   y: number
 }
 
+export type Topdeck = {
+  value: number & { readonly __brand?: 'kd_domino_value' }
+  parity: boolean
+  color: string
+  id: number & { readonly __brand?: 'kd_player_id' }
+}
+
 // FROM BACKEND
 
 export const colors = ['blue', 'green', 'yellow', 'pink']

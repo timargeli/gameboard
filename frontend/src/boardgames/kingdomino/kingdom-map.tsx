@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { KingdominoMap } from './types'
+import { BASE_SIZE } from './utils'
 
 type KingdomMapProps = {
   kingdomId: number
@@ -22,7 +23,6 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
   }
   const [map, setMap] = useState<KingdominoMap>(initialMap)
   const { width, height, minX, minY } = map.dimensions
-  const baseSize = 128
 
   useEffect(() => {
     fetch('http://localhost:3001/api/kingdomino/kingdom/get-map', {
@@ -36,18 +36,16 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
       .then((data) => setMap(data.map))
   }, [kingdomId])
 
-  console.log(map)
-
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${width}, ${baseSize}px)`,
-        gridTemplateRows: `repeat(${height}, ${baseSize}px)`,
+        gridTemplateColumns: `repeat(${width}, ${BASE_SIZE}px)`,
+        gridTemplateRows: `repeat(${height}, ${BASE_SIZE}px)`,
         gap: '0px',
         position: 'relative',
-        width: baseSize * width,
-        height: baseSize * height,
+        width: BASE_SIZE * width,
+        height: BASE_SIZE * height,
         border: '2px solid #333',
       }}
     >
@@ -56,8 +54,8 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
         <div
           key={idx}
           style={{
-            width: baseSize,
-            height: baseSize,
+            width: BASE_SIZE,
+            height: BASE_SIZE,
             border: '1px solid #ccc',
             boxSizing: 'border-box',
             background: '#fafafa',
@@ -73,10 +71,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
           alt={`Domino ${domino.value}`}
           style={{
             position: 'absolute',
-            left: (domino.x - minX) * baseSize,
-            top: (domino.y - minY) * baseSize,
-            width: 2 * baseSize,
-            height: baseSize,
+            left: (domino.x - minX) * BASE_SIZE,
+            top: (domino.y - minY) * BASE_SIZE,
+            width: 2 * BASE_SIZE,
+            height: BASE_SIZE,
             transform: `rotate(${-domino.rot * 90}deg)`,
             transformOrigin: '25% 50%',
             pointerEvents: 'none',
@@ -91,10 +89,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
           alt={`${map.color} castle`}
           style={{
             position: 'absolute',
-            left: -minX * baseSize,
-            top: -minY * baseSize,
-            width: baseSize,
-            height: baseSize,
+            left: -minX * BASE_SIZE,
+            top: -minY * BASE_SIZE,
+            width: BASE_SIZE,
+            height: BASE_SIZE,
             pointerEvents: 'none',
           }}
         />
