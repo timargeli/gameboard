@@ -7,10 +7,12 @@ import { createCellData, getKingdominoOptions } from './utils'
 // A térkép tárolásáért, számításáért felelős osztály
 export class KingdominoMap {
   map: Cell[][]
+  dominos: PlacedDominoJoined[]
   points: number
   territories: Territory[]
   sideSize: number
   kingdominoOptions: KingdominoOptions | null
+  color: string
 
   constructor() {
     this.map = Array.from({ length: 13 }, () => new Array(13).fill(null))
@@ -20,37 +22,38 @@ export class KingdominoMap {
       i: 6,
       j: 6,
     }
+    this.dominos = []
     this.points = 0
     this.territories = []
     this.sideSize = 0
     this.kingdominoOptions = null
+    this.color = ''
   }
 
-  // Kingdom vagy kingdom id alapján lekéri az összes lerakott dominót, és visszatér velük
+  // Kingdom vagy kingdom id alapján lekéri az összes lerakott dominót, és eltárolja őket
   async loadData(kingdom: KdKingdom | KdKingdom['id']) {
     const kd = typeof kingdom === 'number' ? await kd_kingdomTable(db).findOne({ id: kingdom }) : kingdom
     if (!kd) {
       throw new Error('Nem sikerült kingdomot id alapján megtalálni')
     }
     this.kingdominoOptions = await getKingdominoOptions(kd.kingdomino_id)
+    this.color = (await kd_playerTable(db).findOne({ kingdom: kd.id }))?.color || ''
 
     // TODO ! options on de több mint két játékos? createnel?
     this.sideSize = this.kingdominoOptions.big_kingdom_enabled ? 7 : 5
 
-    const pDominos = (await db.query(sql`
+    this.dominos = (await db.query(sql`
       SELECT * FROM kd_kingdom_domino kd
       JOIN kd_domino dom ON dom.value = kd.domino_id
       WHERE kd.kingdom_id=${kd.id}
     `)) as PlacedDominoJoined[]
-
-    return pDominos
   }
 
   // Kingdom vagy kingdom id alapján lekéri, felépíti, pontszámítja az adott kingdomot
   // és beupdateli a playerének pontszámát
   async loadAndBuild(kingdom: KdKingdom | KdKingdom['id']) {
-    const pDominos = await this.loadData(kingdom)
-    this.build(pDominos)
+    await this.loadData(kingdom)
+    this.build(this.dominos) //TODO ezt nem kell átadni, property
     await updatePlayerPoints(typeof kingdom === 'number' ? kingdom : kingdom.id, this.points)
     return this.points
   }
@@ -221,7 +224,7 @@ export class KingdominoMap {
       minJ = 12,
       maxJ = 0
     this.map.forEach((cRow) => {
-      cRow.map((cell) => {
+      cRow.forEach((cell) => {
         if (cell) {
           if (cell.i < minI) {
             minI = cell.i

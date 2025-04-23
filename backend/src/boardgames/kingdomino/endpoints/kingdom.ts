@@ -28,4 +28,37 @@ export const kingdomEndpoints: Endpoint[] = [
       }
     },
   },
+  {
+    endpointType: 'post',
+    path: basePath + '/get-map',
+    handler: async (req, res) => {
+      try {
+        const { kingdomId } = req.body
+        if (!kingdomId) {
+          throw new Error('Kingdom id megadása kötelező')
+        }
+
+        const kingdomMap = new KingdominoMap()
+        await kingdomMap.loadAndBuild(kingdomId)
+        kingdomMap.printMap()
+        const border = kingdomMap.getKingdomBorder()
+        const minX = Math.min(...kingdomMap.dominos.map((dom) => dom.x))
+        const minY = Math.min(...kingdomMap.dominos.map((dom) => dom.y))
+        const width = border.maxJ - border.minJ + 1
+        const height = border.maxI - border.minI + 1
+        console.log(border)
+
+        res
+          .status(201)
+          .json({
+            message: 'Map lekérdezése sikerült',
+            map: { ...kingdomMap, dimensions: { width, height, minX, minY } },
+          }) //TODO lodash pick csak az a négy property ami kell
+      } catch (error) {
+        console.log('Error getting map')
+        console.log(error)
+        res.status(500).json({ message: 'Error getting map', error: (error as any)?.message })
+      }
+    },
+  },
 ]
