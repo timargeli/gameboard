@@ -2,15 +2,18 @@ import React from 'react'
 import logo from './logo.svg'
 import './App.css'
 import { useEffect, useState } from 'react'
-import { KingdomMap } from './boardgames/kingdomino/kingdom-map'
+import { KingdomMap } from './boardgames/kingdomino/kingdom/kingdom-map'
 import { Topdecks } from './boardgames/kingdomino/topdeck/topdecks'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Kingdomino from './boardgames/kingdomino/kingdomino'
+import { BACKEND_URL } from './types'
 //import BackendURL from '../../shared/src/env'
 
 function App() {
   const [helloWorld, setHelloWorld] = useState<string>('')
 
   useEffect(() => {
-    fetch('http://localhost:3001/')
+    fetch(BACKEND_URL)
       .then((response) => response.json())
       .then((data) => setHelloWorld(data.message))
   }, [])
@@ -28,18 +31,24 @@ function App() {
     //   </header>
     //   <KingdomMap kingdomId={1}></KingdomMap>
     // </div>
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#eaeaea', // csak hogy lásd a középre igazítást
-      }}
-    >
-      <Topdecks kingdominoId={2} />
-      <KingdomMap kingdomId={1} />
-    </div>
+    // <div
+    //   style={{
+    //     minHeight: '100vh',
+    //     display: 'flex',
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    //     background: '#eaeaea', // csak hogy lásd a középre igazítást
+    //   }}
+    // >
+    //   <Topdecks kingdominoId={2} />
+    //   <KingdomMap kingdomId={1} />
+    // </div>
+    <BrowserRouter>
+      <Routes>
+        {/* <Route path="/" element={<Home />} /> */}
+        <Route path="/games/kingdomino/:kingdominoId" element={<Kingdomino />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

@@ -1,7 +1,7 @@
 import React from 'react'
-import { Topdeck } from '../types'
 import { BASE_SIZE } from '../utils'
 import { Domino } from './domino'
+import { Topdeck } from './types'
 
 type TopdeckColumnProps = {
   dominos: Topdeck[]
@@ -21,7 +21,7 @@ export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos }) => {
       }}
     >
       {dominos.map((domino) => (
-        <Domino domino={domino} />
+        <Domino key={domino.value} domino={domino} />
       ))}
     </div>
   )

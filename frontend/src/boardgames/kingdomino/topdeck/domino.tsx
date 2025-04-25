@@ -1,6 +1,7 @@
 import React from 'react'
 import { BASE_SIZE } from '../utils'
-import { Topdeck } from '../types'
+import { BACKEND_URL } from '../../../types'
+import { Topdeck } from './types'
 
 type DominoProps = {
   domino: Topdeck
@@ -10,10 +11,10 @@ export const Domino: React.FC<DominoProps> = ({ domino }) => {
   const handleClick = async () => {
     if (domino.color) return // ha van color, ne csináljon semmit
     try {
-      await fetch('http://localhost:3001/api/kingdomino/domino/choose', {
+      await fetch(`${BACKEND_URL}api/kingdomino/domino/choose`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ drawnDominoId: domino.id, playerId: 1 }),
+        body: JSON.stringify({ drawnDominoId: domino.id, playerId: 4 }),
       })
       // Itt lehet state frissítés, ha kell
     } catch (e) {
@@ -36,7 +37,7 @@ export const Domino: React.FC<DominoProps> = ({ domino }) => {
     >
       <img
         key={domino.value}
-        src={`boardgames/kingdomino/tiles/${domino.value}.png`}
+        src={`/boardgames/kingdomino/tiles/${domino.value}.png`}
         alt={`Domino ${domino.value}`}
         style={{
           width: 2 * BASE_SIZE,
@@ -47,7 +48,7 @@ export const Domino: React.FC<DominoProps> = ({ domino }) => {
       />
       {domino.color && (
         <img
-          src={`boardgames/kingdomino/kings/${domino.color}.png`}
+          src={`/boardgames/kingdomino/kings/${domino.color}.png`}
           alt="Center"
           style={{
             position: 'absolute',

@@ -57,3 +57,8 @@ export type Turn = {
   player: KdPlayer['id']
   action: 'place' | 'choose'
 }
+
+export type TurnWithPlayer = {
+  player: KdPlayer
+  action: 'place' | 'choose'
+}

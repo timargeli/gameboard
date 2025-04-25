@@ -1,4 +1,5 @@
 import { Endpoint } from '../../../types'
+import { getTurnWithPlayer } from '../kingdomino'
 import { KingdominoMap } from '../kingdomino/kingdomino-map'
 
 const basePath = '/kingdom'
@@ -33,13 +34,20 @@ export const kingdomEndpoints: Endpoint[] = [
     path: basePath + '/get-map',
     handler: async (req, res) => {
       try {
-        const { kingdomId } = req.body
+        const { kingdomId, kingdominoId } = req.body
+        if (!kingdomId && !kingdominoId) {
+          throw new Error('Kingdom id vagy Kingdomino id megadása kötelező')
+        }
+        // TEMP hegesztés, azt építjük akinek jönnie kell
+        // TODO visszacsinálni ha autentikáció megvan
+        let finalKingdomId = kingdomId
         if (!kingdomId) {
-          throw new Error('Kingdom id megadása kötelező')
+          const turn = await getTurnWithPlayer(kingdominoId)
+          finalKingdomId = turn.player.kingdom
         }
 
         const kingdomMap = new KingdominoMap()
-        await kingdomMap.loadAndBuild(kingdomId)
+        await kingdomMap.loadAndBuild(finalKingdomId)
         kingdomMap.printMap()
         const border = kingdomMap.getKingdomBorder()
         const minX = Math.min(...kingdomMap.dominos.map((dom) => dom.x))
@@ -48,12 +56,10 @@ export const kingdomEndpoints: Endpoint[] = [
         const height = border.maxI - border.minI + 1
         console.log(border)
 
-        res
-          .status(201)
-          .json({
-            message: 'Map lekérdezése sikerült',
-            map: { ...kingdomMap, dimensions: { width, height, minX, minY } },
-          }) //TODO lodash pick csak az a négy property ami kell
+        res.status(201).json({
+          message: 'Map lekérdezése sikerült',
+          map: { ...kingdomMap, dimensions: { width, height, minX, minY } },
+        }) //TODO lodash pick csak az a négy property ami kell
       } catch (error) {
         console.log('Error getting map')
         console.log(error)

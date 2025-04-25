@@ -1,6 +1,6 @@
-import { db, kd_kingdomino_dominoTable, kingdominoTable } from '../../../database/database'
+import { db, kd_kingdomino_dominoTable, kd_playerTable, kingdominoTable } from '../../../database/database'
 import { KdKingdominoDomino, KdPlayer, Kingdomino } from '../../../database/generated'
-import { BulkInsertKDKingdominoDomino, Turn } from './types'
+import { BulkInsertKDKingdominoDomino, Turn, TurnWithPlayer } from './types'
 
 export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   if (!kingdomino) {
@@ -79,6 +79,18 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
     .all()
   if (!drawnDominos.filter((dd) => !dd.chosen_by_player).length) {
     await draw(drawnDomino.kingdomino_id)
+  }
+}
+
+export const getTurnWithPlayer = async (kingdominoId: Kingdomino['id']): Promise<TurnWithPlayer> => {
+  const turn = await getTurn(kingdominoId)
+  const player = await kd_playerTable(db).findOne({ id: turn.player })
+  if (!player) {
+    throw new Error('Nincs ilyen id-jú player: ' + turn.player)
+  }
+  return {
+    player,
+    action: turn.action,
   }
 }
 

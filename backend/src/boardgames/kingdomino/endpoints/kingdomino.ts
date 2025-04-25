@@ -1,6 +1,6 @@
 import { db, sql } from '../../../database/database'
 import { Endpoint } from '../../../types'
-import { draw, getTurn } from '../kingdomino'
+import { getTurnWithPlayer } from '../kingdomino'
 import { Topdeck } from '../kingdomino/types'
 
 const basePath = '/kingdomino'
@@ -15,7 +15,7 @@ export const kingdominoEndpoints: Endpoint[] = [
         if (!kingdominoId) {
           throw new Error('Kingdomino id megadása kötelező')
         }
-        const turn = await getTurn(kingdominoId)
+        const turn = await getTurnWithPlayer(kingdominoId)
 
         res.status(201).json({ message: 'Kör kiszámítása sikerült', turn })
       } catch (error) {
