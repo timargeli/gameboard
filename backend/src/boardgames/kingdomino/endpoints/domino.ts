@@ -68,7 +68,7 @@ export const dominoEndpoints: Endpoint[] = [
         }
 
         const turn = await getTurn(drawnDomino.kingdomino_id)
-        if (turn.player !== playerId) {
+        if (turn.player.id !== playerId) {
           throw new Error('Nem a te köröd van')
         }
         if (turn.action !== 'place') {
@@ -120,9 +120,11 @@ export const dominoEndpoints: Endpoint[] = [
             await endGame(gameId)
             // TODO jobb endgame results
             const results = await getEndgameResults(drawnDomino.kingdomino_id)
-            res
-              .status(201)
-              .json({ message: 'Utolsó dominó beépítése sikerült, a játék véget ért', results: results })
+            res.status(201).json({
+              message: 'Utolsó dominó beépítése sikerült, a játék véget ért',
+              results: results,
+              map: kingdominoMap, //TODO itt nem olyan mapot vár lásd lejjebb
+            })
             return
           }
         }
@@ -132,10 +134,17 @@ export const dominoEndpoints: Endpoint[] = [
 
         // temporary, prints map to console
         kingdominoMap.printMap()
+        const border = kingdominoMap.getKingdomBorder()
+        const minX = Math.min(...kingdominoMap.dominos.map((dom) => dom.x), 0)
+        const minY = Math.min(...kingdominoMap.dominos.map((dom) => dom.y), 0)
+        const width = border.maxJ - border.minJ + 1
+        const height = border.maxI - border.minI + 1
 
-        res
-          .status(201)
-          .json({ message: inTrash ? 'Dominó kukába helyezve' : 'Dominó beépítése sikerült', points: points })
+        res.status(201).json({
+          message: inTrash ? 'Dominó kukába helyezve' : 'Dominó beépítése sikerült',
+          points: points,
+          map: { ...kingdominoMap, dimensions: { width, height, minX, minY } },
+        })
       } catch (error) {
         console.log('Error building domino')
         console.log(error)

@@ -33,7 +33,7 @@ export type PlacedDominoJoined = {
 
 export type DominoToPlace = {
   value: number & { readonly __brand?: 'kd_domino_value' }
-  id: number & { readonly __brand?: 'kd_kingdomino_domino_id' }
+  drawnDominoId: number & { readonly __brand?: 'kd_kingdomino_domino_id' }
   color: string
   rot: number
 }

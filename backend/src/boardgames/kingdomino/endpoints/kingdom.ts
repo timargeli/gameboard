@@ -1,5 +1,5 @@
+import { db, kd_playerTable } from '../../../database/database'
 import { Endpoint } from '../../../types'
-import { getTurnWithPlayer } from '../kingdomino'
 import { KingdominoMap } from '../kingdomino/kingdomino-map'
 
 const basePath = '/kingdom'
@@ -34,27 +34,25 @@ export const kingdomEndpoints: Endpoint[] = [
     path: basePath + '/get-map',
     handler: async (req, res) => {
       try {
-        const { kingdomId, kingdominoId } = req.body
-        if (!kingdomId && !kingdominoId) {
-          throw new Error('Kingdom id vagy Kingdomino id megadása kötelező')
+        const { playerId, kingdominoId } = req.body
+        if (!playerId || !kingdominoId) {
+          throw new Error('player id és Kingdomino id megadása kötelező')
         }
-        // TEMP hegesztés, azt építjük akinek jönnie kell
-        // TODO visszacsinálni ha autentikáció megvan
-        let finalKingdomId = kingdomId
+        // TODO itt user lesz majd nem player, kicsit bonyibb lekérdezés
+
+        const kingdomId = (await kd_playerTable(db).findOne({ id: playerId }))?.kingdom
         if (!kingdomId) {
-          const turn = await getTurnWithPlayer(kingdominoId)
-          finalKingdomId = turn.player.kingdom
+          throw new Error('Nincs kingdom a playerhez: ' + playerId)
         }
 
         const kingdomMap = new KingdominoMap()
-        await kingdomMap.loadAndBuild(finalKingdomId)
+        await kingdomMap.loadAndBuild(kingdomId)
         kingdomMap.printMap()
         const border = kingdomMap.getKingdomBorder()
-        const minX = Math.min(...kingdomMap.dominos.map((dom) => dom.x))
-        const minY = Math.min(...kingdomMap.dominos.map((dom) => dom.y))
+        const minX = Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
+        const minY = Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
         const width = border.maxJ - border.minJ + 1
         const height = border.maxI - border.minI + 1
-        console.log(border)
 
         res.status(201).json({
           message: 'Map lekérdezése sikerült',

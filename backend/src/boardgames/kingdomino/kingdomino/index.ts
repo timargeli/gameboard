@@ -1,6 +1,7 @@
 import { db, kd_kingdomino_dominoTable, kd_playerTable, kingdominoTable } from '../../../database/database'
 import { KdKingdominoDomino, KdPlayer, Kingdomino } from '../../../database/generated'
 import { BulkInsertKDKingdominoDomino, Turn, TurnWithPlayer } from './types'
+import { getPlayer } from './utils'
 
 export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   if (!kingdomino) {
@@ -66,7 +67,7 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
     throw new Error('Ezt a dominót már választotta valaki')
   }
   const turn = await getTurn(drawnDomino.kingdomino_id)
-  if (turn.player !== player) {
+  if (turn.player.id !== player) {
     throw new Error('Nem a te köröd van')
   }
   if (turn.action !== 'choose') {
@@ -74,29 +75,18 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
   }
   await kd_kingdomino_dominoTable(db).update({ id: kingdominoDominoId }, { chosen_by_player: player })
   // Megnézzük hogy kell-e húzni
+  // Csak akkor kell, ha az első 4 dominó kiválasztása után vagyunk
   const drawnDominos = await kd_kingdomino_dominoTable(db)
     .find({ kingdomino_id: drawnDomino.kingdomino_id })
     .all()
-  if (!drawnDominos.filter((dd) => !dd.chosen_by_player).length) {
+  if (drawnDominos.length <= 4 && !drawnDominos.filter((dd) => !dd.chosen_by_player).length) {
     await draw(drawnDomino.kingdomino_id)
-  }
-}
-
-export const getTurnWithPlayer = async (kingdominoId: Kingdomino['id']): Promise<TurnWithPlayer> => {
-  const turn = await getTurn(kingdominoId)
-  const player = await kd_playerTable(db).findOne({ id: turn.player })
-  if (!player) {
-    throw new Error('Nincs ilyen id-jú player: ' + turn.player)
-  }
-  return {
-    player,
-    action: turn.action,
   }
 }
 
 export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => {
   if (!kingdominoId) {
-    throw new Error('Kingdomin id-ja megadása kötelező')
+    throw new Error('Kingdomino id-ja megadása kötelező')
   }
   const kingdomino = await kingdominoTable(db).findOne({ id: kingdominoId })
   if (!kingdomino) {
@@ -123,8 +113,8 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
   // Két oszlopunk van: az elsőben legfeljebb BASE elem lehet, a másodikban pontosan BASE
   // Ha pont BASE mindkettő, akkor az elsőben csak olyan dom van, amit már választottak, a másodikban van szabad is
   const [prevDDs, nextDDs] = [trueParDrawnDominos, falseParDrawnDominos].sort((dd1, dd2) => {
-    const lengtDif = dd1.length - dd2.length
-    return lengtDif || dd1.some((dd) => !dd.chosen_by_player) ? 1 : -1
+    const lengthDif = dd1.length - dd2.length
+    return lengthDif || (dd1.some((dd) => !dd.chosen_by_player) ? 1 : -1)
   })
   if (nextDDs.length !== BASE) {
     throw new Error('Hibás darabszámú húzott dominók')
@@ -134,16 +124,23 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
     // Ha az összes dominó foglalt (játék vége, utsó 4 dominó)
     if (nextDDs.every((dd) => !!dd.chosen_by_player)) {
       const firstDom = nextDDs.sort((dd1, dd2) => dd2.domino_id! - dd1.domino_id!)[0]
+      const player = await getPlayer(firstDom.chosen_by_player!)
       return {
-        player: firstDom.chosen_by_player!,
+        player,
         action: 'place',
+        drawnDomino: {
+          value: firstDom.domino_id!,
+          drawnDominoId: firstDom.id!,
+          color: player.color,
+        },
       }
     } else {
       // Van még nem választott dominó (játék eleje, első 4 dominó)
       // Ilyenkor egy "random" játékos jön, aki még nem volt (mindig ugyanazt adja kingdominonként)
 
-      const randomNumber = kingdominoId + kingdomino.players.reduce((acc: number, p) => acc + (p || 0), 0)
+      let randomNumber = Number(kingdominoId)
       const allPlayers = kingdomino.players as number[]
+      allPlayers.forEach((id) => (randomNumber += id || 0))
       // Készítünk egy poolt a lehetséges jövő játékosokról, majd kivesszük belóle azokat, akik már voltak (annyiszor)
       const playerPool = kingdomino.players.length === 2 ? [...allPlayers, ...allPlayers] : allPlayers
       nextDDs.forEach((dd) => {
@@ -152,7 +149,8 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
         }
       })
 
-      const player = playerPool[randomNumber % playerPool.length]!
+      const playerId = playerPool[randomNumber % playerPool.length]!
+      const player = await getPlayer(playerId)
       return {
         player,
         action: 'choose',
@@ -166,17 +164,24 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
     const chosenCnt = nextDDs.filter((dd) => !!dd.chosen_by_player).length
     // választottak + elsőben lévők szám több mint BASE (BASE+1), akkor építeni kell, az elsőből az első. (BASE+1 bábu van lerakva)
     if (BASE < chosenCnt + prevDDs.length) {
+      const player = await getPlayer(firstPrevDom.chosen_by_player!)
       return {
-        player: firstPrevDom.chosen_by_player!,
+        player,
         action: 'place',
+        drawnDomino: {
+          value: firstPrevDom.domino_id!,
+          drawnDominoId: firstPrevDom.id!,
+          color: player.color,
+        },
       }
     } else {
       if (BASE !== chosenCnt + prevDDs.length) {
         throw new Error('BASE != BASE')
       }
+      const player = await getPlayer(firstPrevDom.chosen_by_player!)
       // pont 4 bábu van lerakva, választ az elsőből az első
       return {
-        player: firstPrevDom.chosen_by_player!,
+        player,
         action: 'choose',
       }
     }

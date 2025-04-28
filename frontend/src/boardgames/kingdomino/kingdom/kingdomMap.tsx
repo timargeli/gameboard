@@ -3,13 +3,15 @@ import { BASE_SIZE } from '../utils'
 import { BACKEND_URL } from '../../../types'
 import { useParams } from 'react-router-dom'
 import { DominoToPlace, KingdominoMap } from './types'
-import { Topdeck } from '../topdeck/types'
+import { Turn } from '../turn-sign/types'
+import { useToast } from '../../../toast-context'
 
 type KingdomMapProps = {
-  kingdomId?: number | null
+  turn?: Turn | null
+  playerId?: number | null // TEMP
 }
 
-export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
+export const KingdomMap: React.FC<KingdomMapProps> = ({ turn, playerId }) => {
   const initialMap: KingdominoMap = {
     map: null,
     dominos: [],
@@ -24,12 +26,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
       minY: 0,
     },
   }
-  const initialDomino: DominoToPlace = {
-    id: 0,
-    value: 0,
-    rot: 0,
-    color: '',
-  }
+
   const [map, setMap] = useState<KingdominoMap>(initialMap)
   const [dominoToPlace, setDominoToPlace] = useState<DominoToPlace | null>(null)
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
@@ -37,14 +34,16 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
 
   const { width, height, minX, minY } = map.dimensions
 
-  // TODO maxnál ne lehessen nagyobb
-  // Növeljük a gridet minden irányban eggyel
-  const gridWidth = width + 2
-  const gridHeight = height + 2
+  const { showToast } = useToast()
+
+  // TODO szépség: maxnál ne lehessen nagyobb
+  // Növeljük a gridet minden irányban eggyel, balra kettővel
+  const gridWidth = width + 4
+  const gridHeight = height + 4
 
   // A grid bal felső sarka
-  const startX = minX - 1
-  const startY = minY - 1
+  const startX = minX - 2
+  const startY = minY - 2
 
   // map lekérdezése
   useEffect(() => {
@@ -53,28 +52,20 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ kingdomId, kingdominoId }),
+      body: JSON.stringify({ playerId, kingdominoId }),
     })
       .then((response) => response.json())
       .then((data) => setMap(data.map))
-  }, [kingdomId, kingdominoId])
+  }, [playerId, kingdominoId])
 
-  // lerakandó dominó lekérdezése
+  // lerakandó dominó beállítása
   useEffect(() => {
-    fetch(`${BACKEND_URL}api/kingdomino/kingdomino/get-topdeck`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ kingdominoId }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const topdecks: Topdeck[][] = data.topdecks
-        const toPlaceColumn = topdecks?.find((col) => col.every((d) => !!d.color))
-        toPlaceColumn?.length && setDominoToPlace({ ...toPlaceColumn[0], rot: 0 })
-      })
-  }, [kingdominoId])
+    if (turn?.drawnDomino && map.color === turn.drawnDomino.color) {
+      setDominoToPlace({ ...turn.drawnDomino, rot: 0 })
+    } else {
+      setDominoToPlace(null)
+    }
+  }, [map, turn]) // Itt a turnt kéne ujrahivni vagy vmi ilyesmi, hogy ne ragadjon be a lerakni való domino
 
   // Dominó forgatása
   const handleRotateDomino = (delta: number) => {
@@ -85,18 +76,32 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
     })
   }
 
-  console.log('dominoToPlace', dominoToPlace)
-
   const handleCellClick = (x: number, y: number) => {
     fetch(`${BACKEND_URL}api/kingdomino/domino/place`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ x, y, rot: dominoToPlace?.rot, drawnDominoId: dominoToPlace?.id, playerId: 4 }), //TODO playerId t is kér ide
+      body: JSON.stringify({
+        x,
+        y,
+        rot: dominoToPlace?.rot,
+        drawnDominoId: dominoToPlace?.drawnDominoId,
+        playerId: turn?.player?.id,
+      }),
     })
-      .then((response) => response.json())
-      .then((data) => console.log(data))
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.error || 'Valami hiba történt!')
+          })
+        }
+        return response.json()
+      })
+      .then((data) => data.map && setMap(data.map))
+      .catch((error) => {
+        showToast(error.message || 'Ismeretlen hiba történt!', 'error')
+      })
   }
 
   return (
@@ -132,8 +137,8 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ kingdomId }) => {
             onMouseLeave={() => setHoveredCell(null)}
             onWheel={(e) => {
               if (!dominoToPlace) return
-              //e.preventDefault()
-              handleRotateDomino(e.deltaY > 0 ? 1 : -1)
+              //e.preventDefault() // TODO ezt megcsinálni jól
+              handleRotateDomino(e.deltaY > 0 ? -1 : 1)
             }}
           />
         )

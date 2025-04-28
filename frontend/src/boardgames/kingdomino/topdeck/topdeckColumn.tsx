@@ -2,12 +2,15 @@ import React from 'react'
 import { BASE_SIZE } from '../utils'
 import { Domino } from './domino'
 import { Topdeck } from './types'
+import { Turn } from '../turn-sign/types'
 
 type TopdeckColumnProps = {
   dominos: Topdeck[]
+  turn: Turn | null
+  playerId: number | null
 }
 
-export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos }) => {
+export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos, turn, playerId }) => {
   return (
     <div
       style={{
@@ -21,7 +24,7 @@ export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos }) => {
       }}
     >
       {dominos.map((domino) => (
-        <Domino key={domino.value} domino={domino} />
+        <Domino key={domino.value} domino={domino} turn={turn} playerId={playerId} />
       ))}
     </div>
   )

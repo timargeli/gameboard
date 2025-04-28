@@ -54,8 +54,13 @@ export type Territory = {
 }
 
 export type Turn = {
-  player: KdPlayer['id']
+  player: KdPlayer
   action: 'place' | 'choose'
+  drawnDomino?: {
+    value: number
+    drawnDominoId: number
+    color: string
+  }
 }
 
 export type TurnWithPlayer = {

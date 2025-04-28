@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BASE_SIZE } from '../utils'
 import { useParams } from 'react-router-dom'
 import { BACKEND_URL } from '../../../types'
-import { TurnWithPlayer } from './types'
+import { Turn } from './types'
 
 const PLAYER_COLORS = [
   '#4F8A8B', // Player 1
@@ -11,22 +11,11 @@ const PLAYER_COLORS = [
   '#A3D2CA', // Player 4
 ]
 
-export const TurnSign: React.FC = () => {
-  const [turn, setTurn] = useState<TurnWithPlayer | null>(null)
-  const { kingdominoId } = useParams<{ kingdominoId: string }>()
+type TurnSignProps = {
+  turn: Turn | null
+}
 
-  useEffect(() => {
-    fetch(`${BACKEND_URL}api/kingdomino/kingdomino/get-turn`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ kingdominoId }),
-    })
-      .then((response) => response.json())
-      .then((data) => setTurn(data.turn))
-  }, [kingdominoId])
-
+export const TurnSign: React.FC<TurnSignProps> = ({ turn }) => {
   if (!turn) return <div style={{ width: BASE_SIZE * 2, height: BASE_SIZE / 2 }} />
 
   return (

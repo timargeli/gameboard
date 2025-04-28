@@ -176,7 +176,7 @@ export class KingdominoMap {
         `Nem teheted rá meglévő dominóra: ${JSON.stringify(this.map[c1.i][c1.j])} ${JSON.stringify(this.map[c2.i][c2.j])}`,
       )
     }
-    // Kilógás ellenőrzése
+    // Kilógás ellenőrzése TODO Ez nem jó, fixálni
     const border = this.getKingdomBorder()
     cells.forEach((cell) => {
       const marginI = this.sideSize - (border.maxI - border.minI)

@@ -3,8 +3,14 @@ import { TopdeckColumn } from './topdeckColumn'
 import { useParams } from 'react-router-dom'
 import { BACKEND_URL } from '../../../types'
 import { Topdeck } from './types'
+import { Turn } from '../turn-sign/types'
 
-export const Topdecks: React.FC = () => {
+type TopdecksProps = {
+  playerId: number | null
+  turn: Turn | null
+}
+
+export const Topdecks: React.FC<TopdecksProps> = ({ turn, playerId }) => {
   const [topdecks, setTopdecks] = useState<Topdeck[][]>([[]])
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
 
@@ -30,7 +36,7 @@ export const Topdecks: React.FC = () => {
       }}
     >
       {topdecks?.map((td, i) => (
-        <TopdeckColumn key={i} dominos={td} />
+        <TopdeckColumn key={i} dominos={td} turn={turn} playerId={playerId} />
       ))}
     </div>
   )

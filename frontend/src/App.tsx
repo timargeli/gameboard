@@ -2,11 +2,12 @@ import React from 'react'
 import logo from './logo.svg'
 import './App.css'
 import { useEffect, useState } from 'react'
-import { KingdomMap } from './boardgames/kingdomino/kingdom/kingdom-map'
+import { KingdomMap } from './boardgames/kingdomino/kingdom/kingdomMap'
 import { Topdecks } from './boardgames/kingdomino/topdeck/topdecks'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Kingdomino from './boardgames/kingdomino/kingdomino'
 import { BACKEND_URL } from './types'
+import { ToastProvider } from './toast-context'
 //import BackendURL from '../../shared/src/env'
 
 function App() {
@@ -43,12 +44,14 @@ function App() {
     //   <Topdecks kingdominoId={2} />
     //   <KingdomMap kingdomId={1} />
     // </div>
-    <BrowserRouter>
-      <Routes>
-        {/* <Route path="/" element={<Home />} /> */}
-        <Route path="/games/kingdomino/:kingdominoId" element={<Kingdomino />} />
-      </Routes>
-    </BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/games/kingdomino/:kingdominoId" element={<Kingdomino />} />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider>
   )
 }
 
