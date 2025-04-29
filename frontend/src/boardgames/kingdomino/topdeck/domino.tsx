@@ -8,10 +8,11 @@ import { Turn } from '../turn-sign/types'
 type DominoProps = {
   domino: Topdeck
   turn: Turn | null
+  setTurn: React.Dispatch<React.SetStateAction<Turn | null>>
   playerId: number | null
 }
 
-export const Domino: React.FC<DominoProps> = ({ domino, turn, playerId }) => {
+export const Domino: React.FC<DominoProps> = ({ domino, turn, setTurn, playerId }) => {
   const { showToast } = useToast()
 
   const handleClick = async () => {
@@ -30,6 +31,7 @@ export const Domino: React.FC<DominoProps> = ({ domino, turn, playerId }) => {
         }
         return response.json()
       })
+      .then((data) => data.turn && setTurn(data.turn))
       .catch((error) => {
         showToast(error.message || 'Ismeretlen hiba történt!', 'error')
       })

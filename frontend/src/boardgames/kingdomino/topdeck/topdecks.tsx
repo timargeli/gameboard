@@ -8,9 +8,10 @@ import { Turn } from '../turn-sign/types'
 type TopdecksProps = {
   playerId: number | null
   turn: Turn | null
+  setTurn: React.Dispatch<React.SetStateAction<Turn | null>>
 }
 
-export const Topdecks: React.FC<TopdecksProps> = ({ turn, playerId }) => {
+export const Topdecks: React.FC<TopdecksProps> = ({ turn, setTurn, playerId }) => {
   const [topdecks, setTopdecks] = useState<Topdeck[][]>([[]])
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
 
@@ -36,7 +37,7 @@ export const Topdecks: React.FC<TopdecksProps> = ({ turn, playerId }) => {
       }}
     >
       {topdecks?.map((td, i) => (
-        <TopdeckColumn key={i} dominos={td} turn={turn} playerId={playerId} />
+        <TopdeckColumn key={i} dominos={td} turn={turn} setTurn={setTurn} playerId={playerId} />
       ))}
     </div>
   )

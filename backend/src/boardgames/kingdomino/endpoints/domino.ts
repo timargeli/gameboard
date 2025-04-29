@@ -28,9 +28,9 @@ export const dominoEndpoints: Endpoint[] = [
         }
 
         //TODO !! validation, a drawnDomino tényleg saját kingdominoban van? placere szintén
-        await chooseDomino(drawnDominoId, playerId)
+        const nextTurn = await chooseDomino(drawnDominoId, playerId)
 
-        res.status(201).json({ message: 'Dominó kiválasztása sikerült' })
+        res.status(201).json({ message: 'Dominó kiválasztása sikerült', turn: nextTurn })
       } catch (error) {
         console.log('Error choosing domino')
         console.log(error)

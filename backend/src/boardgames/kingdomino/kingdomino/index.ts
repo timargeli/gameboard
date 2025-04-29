@@ -82,6 +82,9 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
   if (drawnDominos.length <= 4 && !drawnDominos.filter((dd) => !dd.chosen_by_player).length) {
     await draw(drawnDomino.kingdomino_id)
   }
+
+  // Visszatérünka kövi turn-nel
+  return await getTurn(drawnDomino.kingdomino_id)
 }
 
 export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => {

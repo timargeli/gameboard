@@ -7,28 +7,22 @@ import { Turn } from '../turn-sign/types'
 import { useToast } from '../../../toast-context'
 
 type KingdomMapProps = {
+  map: KingdominoMap
+  setMap: React.Dispatch<React.SetStateAction<KingdominoMap>>
+  dominoToPlace: DominoToPlace | null
+  setDominoToPlace: React.Dispatch<React.SetStateAction<DominoToPlace | null>>
   turn?: Turn | null
   playerId?: number | null // TEMP
 }
 
-export const KingdomMap: React.FC<KingdomMapProps> = ({ turn, playerId }) => {
-  const initialMap: KingdominoMap = {
-    map: null,
-    dominos: [],
-    points: 0,
-    sideSize: 7,
-    kingdominoOptions: null,
-    color: '',
-    dimensions: {
-      width: 7,
-      height: 7,
-      minX: 0,
-      minY: 0,
-    },
-  }
-
-  const [map, setMap] = useState<KingdominoMap>(initialMap)
-  const [dominoToPlace, setDominoToPlace] = useState<DominoToPlace | null>(null)
+export const KingdomMap: React.FC<KingdomMapProps> = ({
+  map,
+  setMap,
+  dominoToPlace,
+  setDominoToPlace,
+  turn,
+  playerId,
+}) => {
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
 
@@ -44,28 +38,6 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({ turn, playerId }) => {
   // A grid bal felső sarka
   const startX = minX - 2
   const startY = minY - 2
-
-  // map lekérdezése
-  useEffect(() => {
-    fetch(`${BACKEND_URL}api/kingdomino/kingdom/get-map`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ playerId, kingdominoId }),
-    })
-      .then((response) => response.json())
-      .then((data) => setMap(data.map))
-  }, [playerId, kingdominoId])
-
-  // lerakandó dominó beállítása
-  useEffect(() => {
-    if (turn?.drawnDomino && map.color === turn.drawnDomino.color) {
-      setDominoToPlace({ ...turn.drawnDomino, rot: 0 })
-    } else {
-      setDominoToPlace(null)
-    }
-  }, [map, turn]) // Itt a turnt kéne ujrahivni vagy vmi ilyesmi, hogy ne ragadjon be a lerakni való domino
 
   // Dominó forgatása
   const handleRotateDomino = (delta: number) => {
