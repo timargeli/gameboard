@@ -44,15 +44,17 @@ export const kingdominoEndpoints: Endpoint[] = [
         const topdeckTrue = topdeck.filter((d) => d.parity).sort((d) => d.value)
         const topdeckFalse = topdeck.filter((d) => !d.parity).sort((d) => d.value)
         // Sorrend eldöntése: Az lesz elöl amelyikben több elem van, vagy amiben van választott dominó
-        const parity =
-          topdeckTrue.length > topdeckFalse.length ||
-          (topdeckTrue.length === topdeckFalse.length && topdeckTrue.find((d) => !!d.color))
+        // const parity =
+        //   topdeckTrue.length > topdeckFalse.length ||
+        //   (topdeckTrue.length === topdeckFalse.length && topdeckTrue.find((d) => !!d.color))
+        //   topdecks: (parity ? [topdeckTrue, topdeckFalse] : [topdeckFalse, topdeckTrue]).filter(
+        //     (array) => !!array.length,
+
+        // inkább csak true false sorrend, ne ugráljon
 
         res.status(201).json({
           message: 'Topdeck lekérdezése sikeült',
-          topdecks: (parity ? [topdeckTrue, topdeckFalse] : [topdeckFalse, topdeckTrue]).filter(
-            (array) => !!array.length,
-          ),
+          topdecks: [topdeckFalse, topdeckTrue].filter((array) => !!array.length),
         })
       } catch (error) {
         console.log('Error getting topdeck')

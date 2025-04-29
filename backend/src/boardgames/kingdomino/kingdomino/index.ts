@@ -116,9 +116,10 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
     const lengthDif = dd1.length - dd2.length
     return lengthDif || (dd1.some((dd) => !dd.chosen_by_player) ? 1 : -1)
   })
-  if (nextDDs.length !== BASE) {
-    throw new Error('Hibás darabszámú húzott dominók')
-  }
+  // Kikommentezem, játék végénél ez hibát dob pedig nem kéne
+  // if (nextDDs.length !== BASE) {
+  //   throw new Error('Hibás darabszámú húzott dominók')
+  // }
   // Üres az első oszlop (játék eleje és vége)
   if (!prevDDs.length) {
     // Ha az összes dominó foglalt (játék vége, utsó 4 dominó)

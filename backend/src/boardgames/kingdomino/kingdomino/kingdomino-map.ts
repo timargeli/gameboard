@@ -116,7 +116,14 @@ export class KingdominoMap {
       if (!nTer) {
         throw new Error('Nem található territory a type szomszédhoz')
       }
-      nTers.push(nTer)
+      // Ha még nem találtuk meg ezt a territoryt, pusholjuk a gyűjtőbe
+      if (
+        !nTers.length ||
+        !nTers.some((nts) =>
+          nts.cells.some((ntsc) => nTer.cells.some((ntc) => ntc.i === ntsc.i && ntc.j === ntsc.j)),
+        )
+      )
+        nTers.push(nTer)
     })
 
     // Attól függően, hogy hány szomszédos territorynk van, újat hozunk létre a cellnek, hozzáadjuk egyhez, vagy összevonunk 2-t
@@ -176,11 +183,11 @@ export class KingdominoMap {
         `Nem teheted rá meglévő dominóra: ${JSON.stringify(this.map[c1.i][c1.j])} ${JSON.stringify(this.map[c2.i][c2.j])}`,
       )
     }
-    // Kilógás ellenőrzése TODO Ez nem jó, fixálni
+    // Kilógás ellenőrzése TODO Ez nem jó, fixálni | MOST MÁR JÓ?
     const border = this.getKingdomBorder()
     cells.forEach((cell) => {
-      const marginI = this.sideSize - (border.maxI - border.minI)
-      const marginJ = this.sideSize - (border.maxJ - border.minJ)
+      const marginI = this.sideSize - (border.maxI - border.minI + 1)
+      const marginJ = this.sideSize - (border.maxJ - border.minJ + 1)
       if (
         cell.i < border.minI - marginI ||
         cell.i > border.maxI + marginI ||

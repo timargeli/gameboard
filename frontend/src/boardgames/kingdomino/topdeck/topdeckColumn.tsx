@@ -11,6 +11,7 @@ type TopdeckColumnProps = {
 }
 
 export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos, turn, playerId }) => {
+  console.log('dominos', dominos)
   return (
     <div
       style={{
@@ -23,9 +24,11 @@ export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos, turn, pla
         padding: '4px',
       }}
     >
-      {dominos.map((domino) => (
-        <Domino key={domino.value} domino={domino} turn={turn} playerId={playerId} />
-      ))}
+      {dominos
+        .sort((d1, d2) => d1.value - d2.value)
+        .map((domino) => (
+          <Domino key={domino.value} domino={domino} turn={turn} playerId={playerId} />
+        ))}
     </div>
   )
 }
