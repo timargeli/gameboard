@@ -1,3 +1,4 @@
+import { getTurn } from '.'
 import {
   kingdominoTable,
   db,
@@ -5,10 +6,11 @@ import {
   boardgameTable,
   gameTable,
   kd_playerTable,
+  sql,
 } from '../../../database/database'
 import { KdPlayer, Kingdomino } from '../../../database/generated'
-import { Cell, CellType } from '../types'
-import { PlacedDominoJoined } from './types'
+import { Cell, CellType, GameState, GameStateString } from '../types'
+import { PlacedDominoJoined, Topdeck } from './types'
 
 // Egy dominóból két cellát számol, forgatás és pozicó alapján
 export const createCellData = (pdom: PlacedDominoJoined) => {
@@ -109,4 +111,45 @@ export const getPlayer = async (playerId: KdPlayer['id']) => {
     throw new Error('Nincs ilyen id-jú player: ' + playerId)
   }
   return player
+}
+
+export const getTopdecks = async (kingdominoId: number | null) => {
+  if (!kingdominoId) {
+    throw new Error('Kingdomino id megadása kötelező')
+  }
+  const topdeck = (await db.query(sql`
+    SELECT dom.value, kdd.id, p.color, kdd.parity FROM kd_kingdomino_domino kdd
+    JOIN kd_domino dom ON dom.value = kdd.domino_id
+    LEFT JOIN kd_player p ON p.id = kdd.chosen_by_player
+    WHERE kdd.kingdomino_id=${kingdominoId}
+  `)) as Topdeck[]
+
+  const topdeckTrue = topdeck.filter((d) => d.parity).sort((d) => d.value)
+  const topdeckFalse = topdeck.filter((d) => !d.parity).sort((d) => d.value)
+  // Sorrend eldöntése: Az lesz elöl amelyikben több elem van, vagy amiben van választott dominó
+  // const parity =
+  //   topdeckTrue.length > topdeckFalse.length ||
+  //   (topdeckTrue.length === topdeckFalse.length && topdeckTrue.find((d) => !!d.color))
+  //   topdecks: (parity ? [topdeckTrue, topdeckFalse] : [topdeckFalse, topdeckTrue]).filter(
+  //     (array) => !!array.length,
+
+  // inkább csak true false sorrend, ne ugráljon
+  return [topdeckFalse, topdeckTrue].filter((array) => !!array.length)
+}
+
+export const getGameState = async (kingdominoId: number): Promise<GameState> => {
+  const state = (
+    await db.query(sql`select state
+    from lobby l
+    join game g on l.game = g.id
+    join boardgame bg on g.boardgame = bg.id
+    where bg.kingdomino = ${kingdominoId}`)
+  )[0] as GameStateString
+  const turn = await getTurn(kingdominoId)
+  const topdecks = await getTopdecks(kingdominoId)
+  return {
+    gameState: state,
+    turn,
+    topdecks,
+  }
 }

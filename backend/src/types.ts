@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 
-export enum GameState {
+export enum GameStateString {
   waiting = 'waiting',
   inGame = 'in_game',
   ended = 'ended',

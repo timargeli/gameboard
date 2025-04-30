@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { KingdomMap } from './kingdom/kingdomMap'
 import { TurnSign } from './turn-sign/turnSign'
 import { Topdecks } from './topdeck/topdecks'
@@ -6,6 +6,12 @@ import { useLocation, useParams } from 'react-router-dom'
 import { BACKEND_URL } from '../../types'
 import { Turn } from './turn-sign/types'
 import { DominoToPlace, KingdominoMap } from './kingdom/types'
+import io, { Socket } from 'socket.io-client'
+import { GameState } from './types'
+import { Topdeck } from './topdeck/types'
+import { useToast } from '../../toast-context'
+
+const SOCKET_URL = BACKEND_URL + 'kingdomino'
 
 const initialMap: KingdominoMap = {
   map: null,
@@ -29,20 +35,51 @@ const Kingdomino: React.FC = () => {
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
   const [turn, setTurn] = useState<Turn | null>(null)
   const [map, setMap] = useState<KingdominoMap>(initialMap)
+  const [topdecks, setTopdecks] = useState<Topdeck[][]>([[]])
   const [dominoToPlace, setDominoToPlace] = useState<DominoToPlace | null>(null)
 
-  // Turn lekérdezése
+  const { showToast } = useToast()
+
+  // Socket ref, hogy ne hozzon létre minden rendernél újat
+  const socketRef = useRef<typeof Socket | null>(null)
+
   useEffect(() => {
-    fetch(`${BACKEND_URL}api/kingdomino/kingdomino/get-turn`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ kingdominoId }),
+    if (!playerId || !kingdominoId) return
+    const socket = io(SOCKET_URL)
+    socketRef.current = socket
+
+    // Csatlakozás a játékhoz
+    socket.emit('join-game', { kingdominoId, playerId })
+
+    // Játékállapot fogadása
+    socket.on('game-state', (gameState: GameState) => {
+      setTurn(gameState.turn)
+      setTopdecks(gameState.topdecks)
     })
-      .then((response) => response.json())
-      .then((data) => setTurn(data.turn))
-  }, [map, kingdominoId])
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [playerId, kingdominoId])
+
+  // Dominó választás küldése szerverre
+  const chooseDomino = (drawnDominoId: number) => {
+    socketRef.current?.emit(
+      'choose-domino',
+      { kingdominoId, drawnDominoId, playerId },
+      (response: { success: boolean; message?: string }) => {
+        if (!response.success && response.message) {
+          showToast(response.message, 'error')
+        }
+      }
+    )
+  }
+
+  // Dominó lerakás küldése szerverre - ez endpointtal megy, ez csak a többieknek szól (hibakezelés sincs)
+  // TODO? ezt is átszervezni ide
+  const placeDomino = (/*x: number, y: number, rot: number, inTrash: boolean, drawnDominoId: number*/) => {
+    socketRef.current?.emit('place-domino', { kingdominoId, playerId })
+  }
 
   // map lekérdezése
   useEffect(() => {
@@ -55,7 +92,7 @@ const Kingdomino: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => setMap(data.map))
-  }, [playerId, kingdominoId])
+  }, [turn, playerId, kingdominoId])
 
   // lerakandó dominó beállítása
   useEffect(() => {
@@ -64,7 +101,7 @@ const Kingdomino: React.FC = () => {
     } else {
       setDominoToPlace(null)
     }
-  }, [map, turn]) // Itt a turnt kéne ujrahivni vagy vmi ilyesmi, hogy ne ragadjon be a lerakni való domino
+  }, [turn])
 
   return (
     <div
@@ -90,9 +127,9 @@ const Kingdomino: React.FC = () => {
           dominoToPlace={dominoToPlace}
           setDominoToPlace={setDominoToPlace}
           turn={turn}
-          playerId={Number(playerId)}
+          placeDomino={placeDomino}
         />
-        <Topdecks turn={turn} setTurn={setTurn} playerId={Number(playerId)} />
+        <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} />
       </div>
     </div>
   )

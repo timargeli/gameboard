@@ -1,5 +1,8 @@
 // FROM BACKEND
 
+import { Topdeck } from './topdeck/types'
+import { Turn } from './turn-sign/types'
+
 export const colors = ['blue', 'green', 'yellow', 'pink']
 
 export enum CellType {
@@ -21,7 +24,13 @@ export type Cell = {
 
 // FROM SHARED
 
-export type GameState = 'waiting' | 'in_game' | 'ended'
+export type GameState = {
+  gameState: GameStateString
+  turn: Turn
+  topdecks: Topdeck[][]
+}
+
+export type GameStateString = 'waiting' | 'in_game' | 'ended'
 export type GameName = 'kingdomino' | 'some_other_game'
 
 export type User = {
@@ -33,7 +42,7 @@ export type User = {
 
 export type Lobby = {
   id: number
-  state: GameState
+  state: GameStateString
   game_name: GameName
   game?: number | Game | null
   game_options?: number | GameOptions | null

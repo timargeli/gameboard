@@ -2,6 +2,7 @@ import { db, sql } from '../../../database/database'
 import { Endpoint } from '../../../types'
 import { getTurn } from '../kingdomino'
 import { Topdeck } from '../kingdomino/types'
+import { getTopdecks } from '../kingdomino/utils'
 
 const basePath = '/kingdomino'
 
@@ -31,30 +32,11 @@ export const kingdominoEndpoints: Endpoint[] = [
     handler: async (req, res) => {
       try {
         const { kingdominoId } = req.body
-        if (!kingdominoId) {
-          throw new Error('Kingdomino id megadása kötelező')
-        }
-        const topdeck = (await db.query(sql`
-          SELECT dom.value, kdd.id, p.color, kdd.parity FROM kd_kingdomino_domino kdd
-          JOIN kd_domino dom ON dom.value = kdd.domino_id
-          LEFT JOIN kd_player p ON p.id = kdd.chosen_by_player
-          WHERE kdd.kingdomino_id=${kingdominoId}
-        `)) as Topdeck[]
-
-        const topdeckTrue = topdeck.filter((d) => d.parity).sort((d) => d.value)
-        const topdeckFalse = topdeck.filter((d) => !d.parity).sort((d) => d.value)
-        // Sorrend eldöntése: Az lesz elöl amelyikben több elem van, vagy amiben van választott dominó
-        // const parity =
-        //   topdeckTrue.length > topdeckFalse.length ||
-        //   (topdeckTrue.length === topdeckFalse.length && topdeckTrue.find((d) => !!d.color))
-        //   topdecks: (parity ? [topdeckTrue, topdeckFalse] : [topdeckFalse, topdeckTrue]).filter(
-        //     (array) => !!array.length,
-
-        // inkább csak true false sorrend, ne ugráljon
+        const topdecks = await getTopdecks(kingdominoId)
 
         res.status(201).json({
           message: 'Topdeck lekérdezése sikeült',
-          topdecks: [topdeckFalse, topdeckTrue].filter((array) => !!array.length),
+          topdecks,
         })
       } catch (error) {
         console.log('Error getting topdeck')

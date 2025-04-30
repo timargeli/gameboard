@@ -2,7 +2,7 @@ import { Kingdomino } from '../boardgames/kingdomino'
 import { db, game_optionsTable, gameTable, lobbyTable } from '../database/database'
 import { Lobby_InsertParameters } from '../database/generated'
 import { getLobby } from '../database/utils'
-import { Endpoint, GameState } from '../types'
+import { Endpoint, GameStateString } from '../types'
 
 const basePath = '/lobby'
 
@@ -136,7 +136,7 @@ export const lobbyEndpoints: Endpoint[] = [
         }
 
         //update lobby
-        await lobbyTable(db).update({ id: lobbyId }, { game: game.id, state: GameState.inGame })
+        await lobbyTable(db).update({ id: lobbyId }, { game: game.id, state: GameStateString.inGame })
 
         res.status(201).json({ message: 'Lobby started' })
       } catch (error) {

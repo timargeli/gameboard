@@ -12,7 +12,7 @@ type KingdomMapProps = {
   dominoToPlace: DominoToPlace | null
   setDominoToPlace: React.Dispatch<React.SetStateAction<DominoToPlace | null>>
   turn?: Turn | null
-  playerId?: number | null // TEMP
+  placeDomino: (/*x: number, y: number, rot: number, inTrash: boolean, drawnDominoId: number*/) => void
 }
 
 export const KingdomMap: React.FC<KingdomMapProps> = ({
@@ -21,10 +21,9 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   dominoToPlace,
   setDominoToPlace,
   turn,
-  playerId,
+  placeDomino,
 }) => {
   const [hoveredCell, setHoveredCell] = useState<{ x: number; y: number } | null>(null)
-  const { kingdominoId } = useParams<{ kingdominoId: string }>()
 
   const { width, height, minX, minY } = map.dimensions
 
@@ -71,6 +70,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
         return response.json()
       })
       .then((data) => data.map && setMap(data.map))
+      .then(() => placeDomino())
       .catch((error) => {
         showToast(error.message || 'Ismeretlen hiba történt!', 'error')
       })

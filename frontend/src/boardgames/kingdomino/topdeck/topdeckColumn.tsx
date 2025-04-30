@@ -7,11 +7,10 @@ import { Turn } from '../turn-sign/types'
 type TopdeckColumnProps = {
   dominos: Topdeck[]
   turn: Turn | null
-  setTurn: React.Dispatch<React.SetStateAction<Turn | null>>
-  playerId: number | null
+  chooseDomino: (drawnDominoId: number) => void
 }
 
-export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos, turn, setTurn, playerId }) => {
+export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ chooseDomino, dominos, turn }) => {
   return (
     <div
       style={{
@@ -27,7 +26,7 @@ export const TopdeckColumn: React.FC<TopdeckColumnProps> = ({ dominos, turn, set
       {dominos
         .sort((d1, d2) => d1.value - d2.value)
         .map((domino) => (
-          <Domino key={domino.value} domino={domino} turn={turn} setTurn={setTurn} playerId={playerId} />
+          <Domino key={domino.value} domino={domino} turn={turn} chooseDomino={chooseDomino} />
         ))}
     </div>
   )

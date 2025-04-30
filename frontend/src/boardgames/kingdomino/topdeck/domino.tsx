@@ -8,33 +8,13 @@ import { Turn } from '../turn-sign/types'
 type DominoProps = {
   domino: Topdeck
   turn: Turn | null
-  setTurn: React.Dispatch<React.SetStateAction<Turn | null>>
-  playerId: number | null
+  chooseDomino: (drawnDominoId: number) => void
 }
 
-export const Domino: React.FC<DominoProps> = ({ domino, turn, setTurn, playerId }) => {
-  const { showToast } = useToast()
-
+export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino }) => {
   const handleClick = async () => {
     if (domino.color) return // ha van color, ne csináljon semmit
-
-    await fetch(`${BACKEND_URL}api/kingdomino/domino/choose`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ drawnDominoId: domino.id, playerId }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((data) => {
-            throw new Error(data.error || 'Valami hiba történt!')
-          })
-        }
-        return response.json()
-      })
-      .then((data) => data.turn && setTurn(data.turn))
-      .catch((error) => {
-        showToast(error.message || 'Ismeretlen hiba történt!', 'error')
-      })
+    chooseDomino(domino.id)
   }
 
   return (

@@ -1,4 +1,4 @@
-import { GameState } from '../../types'
+import { GameStateString } from '../../types'
 import { game_optionsTable, db, kingdomino_optionsTable, lobbyTable, kd_dominoTable } from '../database'
 import { Game, KdDomino, Lobby } from '../generated'
 
@@ -51,7 +51,7 @@ export const endGame = async (gameId?: Game['id'] | null) => {
     throw new Error('gameId megadása kötelező')
   }
   // TODO egyéb ending logika
-  const res = await lobbyTable(db).update({ game: gameId }, { state: GameState.ended })
+  const res = await lobbyTable(db).update({ game: gameId }, { state: GameStateString.ended })
   if (!res.length) {
     throw new Error('Nincs ilyen gameId-jú lobby')
   }
