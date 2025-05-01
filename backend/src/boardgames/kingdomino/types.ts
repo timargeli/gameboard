@@ -1,3 +1,4 @@
+import { PlayerData } from './game/types'
 import { Topdeck, Turn } from './kingdomino/types'
 
 export const colors = ['blue', 'green', 'yellow', 'pink']
@@ -25,6 +26,7 @@ export type GameState = {
   gameState: GameStateString
   turn: Turn
   topdecks: Topdeck[][]
+  results?: PlayerData[]
 }
 
 export type GameStateString = 'waiting' | 'in_game' | 'ended'

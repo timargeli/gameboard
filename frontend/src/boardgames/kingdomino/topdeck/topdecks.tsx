@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { TopdeckColumn } from './topdeckColumn'
-import { useParams } from 'react-router-dom'
-import { BACKEND_URL } from '../../../types'
 import { Topdeck } from './types'
 import { Turn } from '../turn-sign/types'
 

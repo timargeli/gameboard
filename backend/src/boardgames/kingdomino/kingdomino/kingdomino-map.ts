@@ -53,18 +53,18 @@ export class KingdominoMap {
   // és beupdateli a playerének pontszámát
   async loadAndBuild(kingdom: KdKingdom | KdKingdom['id']) {
     await this.loadData(kingdom)
-    this.build(this.dominos) //TODO ezt nem kell átadni, property
+    this.build()
     await updatePlayerPoints(typeof kingdom === 'number' ? kingdom : kingdom.id, this.points)
     return this.points
   }
 
   // Térkép felépítése
-  build(pDominos: PlacedDominoJoined[]) {
-    if (!pDominos.length) {
+  build() {
+    if (!this.dominos.length) {
       return this.points
     }
     // Feltételezzük, hogy helyesek a dominók, feltöltjük a mapot
-    pDominos.forEach((pdom) => {
+    this.dominos.forEach((pdom) => {
       const { c1, c2 } = createCellData(pdom)
       this.map[c1.i][c1.j] = c1
       this.map[c2.i][c2.j] = c2
@@ -74,7 +74,7 @@ export class KingdominoMap {
     this.buildTerritories()
 
     // Befejezett királyságért kapható bónuszpont
-    if (this.kingdominoOptions?.complete_bonus && pDominos.length === (this.sideSize === 7 ? 24 : 12)) {
+    if (this.kingdominoOptions?.complete_bonus && this.dominos.length === (this.sideSize === 7 ? 24 : 12)) {
       this.points += 5
     }
     // Középen lévő kastélyért kapható bónuszpont
@@ -183,7 +183,7 @@ export class KingdominoMap {
         `Nem teheted rá meglévő dominóra: ${JSON.stringify(this.map[c1.i][c1.j])} ${JSON.stringify(this.map[c2.i][c2.j])}`,
       )
     }
-    // Kilógás ellenőrzése TODO Ez nem jó, fixálni | MOST MÁR JÓ?
+    // Kilógás ellenőrzése
     const border = this.getKingdomBorder()
     cells.forEach((cell) => {
       const marginI = this.sideSize - (border.maxI - border.minI + 1)

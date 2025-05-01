@@ -49,8 +49,8 @@ export const kingdomEndpoints: Endpoint[] = [
         await kingdomMap.loadAndBuild(kingdomId)
         kingdomMap.printMap()
         const border = kingdomMap.getKingdomBorder()
-        const minX = Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
-        const minY = Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
+        const minX = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
+        const minY = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
         const width = border.maxJ - border.minJ + 1
         const height = border.maxI - border.minI + 1
 

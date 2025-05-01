@@ -9,6 +9,7 @@ import {
   sql,
 } from '../../../database/database'
 import { KdPlayer, Kingdomino } from '../../../database/generated'
+import { getEndgameResults } from '../game'
 import { Cell, CellType, GameState, GameStateString } from '../types'
 import { PlacedDominoJoined, Topdeck } from './types'
 
@@ -138,18 +139,24 @@ export const getTopdecks = async (kingdominoId: number | null) => {
 }
 
 export const getGameState = async (kingdominoId: number): Promise<GameState> => {
-  const state = (
+  const state = await getGameStateString(kingdominoId)
+  const turn = await getTurn(kingdominoId)
+  const topdecks = await getTopdecks(kingdominoId)
+  const results = state === 'ended' ? await getEndgameResults(kingdominoId) : undefined
+  return {
+    gameState: state,
+    turn,
+    topdecks,
+    results,
+  }
+}
+
+export const getGameStateString = async (kingdominoId: number) => {
+  return (
     await db.query(sql`select state
     from lobby l
     join game g on l.game = g.id
     join boardgame bg on g.boardgame = bg.id
     where bg.kingdomino = ${kingdominoId}`)
-  )[0] as GameStateString
-  const turn = await getTurn(kingdominoId)
-  const topdecks = await getTopdecks(kingdominoId)
-  return {
-    gameState: state,
-    turn,
-    topdecks,
-  }
+  )[0].state as GameStateString
 }

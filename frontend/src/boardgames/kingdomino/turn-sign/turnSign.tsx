@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { BASE_SIZE } from '../utils'
-import { useParams } from 'react-router-dom'
-import { BACKEND_URL } from '../../../types'
 import { Turn } from './types'
+import { GameStateString } from '../types'
 
 const PLAYER_COLORS = [
   '#4F8A8B', // Player 1
@@ -13,9 +12,10 @@ const PLAYER_COLORS = [
 
 type TurnSignProps = {
   turn: Turn | null
+  state: GameStateString
 }
 
-export const TurnSign: React.FC<TurnSignProps> = ({ turn }) => {
+export const TurnSign: React.FC<TurnSignProps> = ({ turn, state }) => {
   if (!turn) return <div style={{ width: BASE_SIZE * 2, height: BASE_SIZE / 2 }} />
 
   return (
@@ -24,7 +24,7 @@ export const TurnSign: React.FC<TurnSignProps> = ({ turn }) => {
         width: BASE_SIZE * 2.5, // szélesebb téglalap
         height: BASE_SIZE * 0.7, // alacsonyabb
         borderRadius: BASE_SIZE * 0.2, // lekerekített sarkok
-        background: `${turn.player.color}`,
+        background: `${state === 'ended' ? '#ffb300' : turn.player.color}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -44,9 +44,9 @@ export const TurnSign: React.FC<TurnSignProps> = ({ turn }) => {
       }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span
-          style={{ fontSize: BASE_SIZE / 5, opacity: 0.9 }}
-        >{`It's player ${turn.player.id}'s turn to ${turn.action}`}</span>
+        <span style={{ fontSize: BASE_SIZE / 5, opacity: 0.9 }}>
+          {state === 'ended' ? 'A játéknak vége' : `It's player ${turn.player.id}'s turn to ${turn.action}`}
+        </span>
       </span>
     </div>
   )

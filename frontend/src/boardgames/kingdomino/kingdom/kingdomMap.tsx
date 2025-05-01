@@ -30,13 +30,17 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   const { showToast } = useToast()
 
   // TODO szépség: maxnál ne lehessen nagyobb
-  // Növeljük a gridet minden irányban eggyel, balra kettővel
-  const gridWidth = width + 4
-  const gridHeight = height + 4
+  // Növeljük a gridet minden irányban kettővel, ha még nem érte el a maxot
+  const gridWidth = map.sideSize === width ? width : width + 4
+  const gridHeight = map.sideSize === height ? height : height + 4
+
+  console.log(width)
+  console.log(height)
+  console.log(map.dimensions)
 
   // A grid bal felső sarka
-  const startX = minX - 2
-  const startY = minY - 2
+  const startX = map.sideSize === width ? minX : minX - 2
+  const startY = map.sideSize === height ? minY : minY - 2
 
   // Dominó forgatása
   const handleRotateDomino = (delta: number) => {

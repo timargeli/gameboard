@@ -1,8 +1,6 @@
 import React from 'react'
 import { BASE_SIZE } from '../utils'
-import { BACKEND_URL } from '../../../types'
 import { Topdeck } from './types'
-import { useToast } from '../../../toast-context'
 import { Turn } from '../turn-sign/types'
 
 type DominoProps = {

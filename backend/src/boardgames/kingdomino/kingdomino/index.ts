@@ -10,7 +10,7 @@ import { getDomino, endGame } from '../../../database/utils'
 import { getEndgameResults } from '../game'
 import { KingdominoMap } from './kingdomino-map'
 import { BulkInsertKDKingdominoDomino, Turn, TurnWithPlayer } from './types'
-import { getGameId, getPlayer } from './utils'
+import { getGameId, getGameState, getGameStateString, getPlayer } from './utils'
 
 export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   if (!kingdomino) {
@@ -176,12 +176,14 @@ export const placeDomino = async (
     if (!drawnDominos.length) {
       const gameId = await getGameId(drawnDomino.kingdomino_id)
       await endGame(gameId)
-      // TODO jobb endgame results
-      const results = await getEndgameResults(drawnDomino.kingdomino_id)
+      const border = kingdominoMap.getKingdomBorder()
+      const minX = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
+      const minY = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
+      const width = border.maxJ - border.minJ + 1
+      const height = border.maxI - border.minI + 1
       return {
         message: 'Utolsó dominó beépítése sikerült, a játék véget ért',
-        results: results,
-        map: kingdominoMap, //TODO itt nem olyan mapot vár lásd lejjebb
+        map: { ...kingdominoMap, dimensions: { width, height, minX, minY } },
       }
     }
   }
@@ -192,8 +194,8 @@ export const placeDomino = async (
   // temporary, prints map to console
   kingdominoMap.printMap()
   const border = kingdominoMap.getKingdomBorder()
-  const minX = Math.min(...kingdominoMap.dominos.map((dom) => dom.x), 0)
-  const minY = Math.min(...kingdominoMap.dominos.map((dom) => dom.y), 0)
+  const minX = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
+  const minY = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
   const width = border.maxJ - border.minJ + 1
   const height = border.maxI - border.minI + 1
 
@@ -217,6 +219,14 @@ export const getTurn = async (kingdominoId: Kingdomino['id']): Promise<Turn> => 
   }
   if (kingdomino.players.some((p) => !p)) {
     throw new Error('Hiányzik az egyik játékos id. Kingdomino id: ' + kingdomino.id)
+  }
+  const state = await getGameStateString(kingdominoId)
+  if (state === 'ended') {
+    // TODO proper dummy return
+    return {
+      player: await getPlayer(kingdomino.players[0]!),
+      action: 'choose',
+    }
   }
 
   const allDrawnDominos = await kd_kingdomino_dominoTable(db).find({ kingdomino_id: kingdominoId }).all()

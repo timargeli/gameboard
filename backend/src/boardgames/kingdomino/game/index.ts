@@ -4,12 +4,13 @@ import {
   kd_kingdomTable,
   kd_playerTable,
   kingdominoTable,
+  sql,
 } from '../../../database/database'
 import { Boardgame, Kingdomino, KingdominoOptions, Lobby } from '../../../database/generated'
 import { getGameOptions } from '../../../database/utils'
 import { draw } from '../kingdomino'
 import { colors } from '../types'
-import { BulkInsertKDKingdomParameters, BulkInsertKDPlayerParameters } from './types'
+import { BulkInsertKDKingdomParameters, BulkInsertKDPlayerParameters, PlayerData } from './types'
 
 export const deleteGame = async (boardgameId: Boardgame['id']) => {
   const boardgame = await boardgameTable(db).findOne({ id: boardgameId })
@@ -114,16 +115,13 @@ export const getEndgameResults = async (kingdominoId: Kingdomino['id'] | null) =
   if (!kingdominoId) {
     throw new Error('kingdomoni Id endgameresulthoz kötelező')
   }
-  const kingdoms = await kd_kingdomTable(db).find({ kingdomino_id: kingdominoId }).all()
-  if (!kingdoms.length) {
-    throw new Error('Nincsenek kingdomok a kingdominóhoz')
-  }
-  const players = await kd_playerTable(db)
-    .bulkFind({
-      whereColumnNames: ['kingdom'],
-      whereConditions: kingdoms.map((k) => ({ kingdom: k.id })),
-    })
-    .all()
+  const players = (await db.query(sql`
+    SELECT p.id, p.color, p.points, u.name
+    FROM kd_player p
+    JOIN users u on p.user = u.id
+    JOIN kd_kingdom k on p.kingdom = k.id
+    WHERE k.kingdomino_id=${kingdominoId}
+  `)) as PlayerData[]
 
   return players.sort((p1, p2) => p2.points - p1.points)
 }

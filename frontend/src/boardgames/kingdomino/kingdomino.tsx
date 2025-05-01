@@ -7,9 +7,11 @@ import { BACKEND_URL } from '../../types'
 import { Turn } from './turn-sign/types'
 import { DominoToPlace, KingdominoMap } from './kingdom/types'
 import io, { Socket } from 'socket.io-client'
-import { GameState } from './types'
+import { GameState, GameStateString, PlayerData } from './types'
 import { Topdeck } from './topdeck/types'
 import { useToast } from '../../toast-context'
+import { WinnerBoard } from './winner-board/winnerBoard'
+import { Trash } from './trash/trash'
 
 const SOCKET_URL = BACKEND_URL + 'kingdomino'
 
@@ -33,10 +35,13 @@ const Kingdomino: React.FC = () => {
   const searchParams = new URLSearchParams(location.search)
   const playerId = searchParams.get('playerId')
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
+
   const [turn, setTurn] = useState<Turn | null>(null)
   const [map, setMap] = useState<KingdominoMap>(initialMap)
   const [topdecks, setTopdecks] = useState<Topdeck[][]>([[]])
   const [dominoToPlace, setDominoToPlace] = useState<DominoToPlace | null>(null)
+  const [gameStateString, setGameStateString] = useState<GameStateString>('in_game')
+  const [endgameResults, setEndgameResults] = useState<PlayerData[] | null>(null)
 
   const { showToast } = useToast()
 
@@ -55,6 +60,8 @@ const Kingdomino: React.FC = () => {
     socket.on('game-state', (gameState: GameState) => {
       setTurn(gameState.turn)
       setTopdecks(gameState.topdecks)
+      setGameStateString(gameState.gameState)
+      gameStateString === 'ended' && gameState.results && setEndgameResults(gameState.results)
     })
 
     return () => {
@@ -103,6 +110,8 @@ const Kingdomino: React.FC = () => {
     }
   }, [turn])
 
+  console.log('engamde', endgameResults)
+
   return (
     <div
       style={{
@@ -112,13 +121,13 @@ const Kingdomino: React.FC = () => {
         gap: 24, // távolság a sorok között
       }}
     >
-      <TurnSign turn={turn} />
+      <TurnSign turn={turn} state={gameStateString} />
       <div
         style={{
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'flex-start',
-          gap: 32, // távolság a map és a decks között
+          gap: 32,
         }}
       >
         <KingdomMap
@@ -129,7 +138,14 @@ const Kingdomino: React.FC = () => {
           turn={turn}
           placeDomino={placeDomino}
         />
-        <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          {!endgameResults ? (
+            <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} />
+          ) : (
+            <WinnerBoard winners={endgameResults}></WinnerBoard>
+          )}
+          {dominoToPlace && <Trash dominoToPlace={dominoToPlace} turn={turn} placeDomino={placeDomino} />}
+        </div>
       </div>
     </div>
   )

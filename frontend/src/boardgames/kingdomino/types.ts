@@ -24,10 +24,18 @@ export type Cell = {
 
 // FROM SHARED
 
+export type PlayerData = {
+  id: number
+  points: number
+  color: string
+  name: string
+}
+
 export type GameState = {
   gameState: GameStateString
   turn: Turn
   topdecks: Topdeck[][]
+  results?: PlayerData[]
 }
 
 export type GameStateString = 'waiting' | 'in_game' | 'ended'

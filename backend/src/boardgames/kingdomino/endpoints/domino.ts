@@ -46,18 +46,10 @@ export const dominoEndpoints: Endpoint[] = [
         // TODO ! code cleanup, mi ez a hányás
         // TODO !! validation, ez a dominó jön beépítésre? getturn visszatérése bővítés
         const { drawnDominoId, playerId, x, y, rot, inTrash } = req.body
-        const { message, map, points, results } = await placeDomino(
-          drawnDominoId,
-          playerId,
-          x,
-          y,
-          rot,
-          inTrash,
-        )
+        const { message, map, points } = await placeDomino(drawnDominoId, playerId, x, y, rot, inTrash)
 
         res.status(201).json({
           message,
-          results,
           points,
           map,
         })
