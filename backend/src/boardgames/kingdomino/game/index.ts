@@ -40,10 +40,15 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
       .map((a) => a.value)
       .slice(-deckSize)
 
+    const shuffledColors = colors
+      .map((c) => ({ color: c, random: Math.random() }))
+      .sort((cr1, cr2) => cr1.random - cr2.random)
+      .map((cr) => cr.color)
+
     const kdKingdomsRaw: BulkInsertKDKingdomParameters[] = []
     lobby.players.forEach((p, index) => {
       kdKingdomsRaw.push({
-        color: colors[index],
+        color: shuffledColors[index],
       })
     })
     const kdKingdoms = await kd_kingdomTable(db).bulkInsert({
@@ -59,7 +64,7 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
       kdPlayersRaw.push({
         user: p,
         kingdom: kdKingdoms[index].id,
-        color: colors[index],
+        color: shuffledColors[index],
         points: 0,
       })
     })

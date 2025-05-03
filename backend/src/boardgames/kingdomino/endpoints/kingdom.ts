@@ -47,16 +47,11 @@ export const kingdomEndpoints: Endpoint[] = [
 
         const kingdomMap = new KingdominoMap()
         await kingdomMap.loadAndBuild(kingdomId)
-        kingdomMap.printMap()
         const border = kingdomMap.getKingdomBorder()
-        const minX = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
-        const minY = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
-        const width = border.maxJ - border.minJ + 1
-        const height = border.maxI - border.minI + 1
 
         res.status(201).json({
           message: 'Map lekérdezése sikerült',
-          map: { ...kingdomMap, dimensions: { width, height, minX, minY } },
+          map: { ...kingdomMap, dimensions: border },
         }) //TODO lodash pick csak az a négy property ami kell
       } catch (error) {
         console.log('Error getting map')

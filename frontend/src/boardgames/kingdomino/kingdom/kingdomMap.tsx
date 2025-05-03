@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { BASE_SIZE } from '../utils'
+import React, { useState } from 'react'
 import { BACKEND_URL } from '../../../types'
-import { useParams } from 'react-router-dom'
 import { DominoToPlace, KingdominoMap } from './types'
 import { Turn } from '../turn-sign/types'
 import { useToast } from '../../../toast-context'
@@ -11,6 +9,7 @@ type KingdomMapProps = {
   setMap: React.Dispatch<React.SetStateAction<KingdominoMap>>
   dominoToPlace: DominoToPlace | null
   setDominoToPlace: React.Dispatch<React.SetStateAction<DominoToPlace | null>>
+  baseSize: number
   turn?: Turn | null
   placeDomino: (/*x: number, y: number, rot: number, inTrash: boolean, drawnDominoId: number*/) => void
 }
@@ -20,6 +19,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   setMap,
   dominoToPlace,
   setDominoToPlace,
+  baseSize,
   turn,
   placeDomino,
 }) => {
@@ -33,10 +33,6 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   // Növeljük a gridet minden irányban kettővel, ha még nem érte el a maxot
   const gridWidth = map.sideSize === width ? width : width + 4
   const gridHeight = map.sideSize === height ? height : height + 4
-
-  console.log(width)
-  console.log(height)
-  console.log(map.dimensions)
 
   // A grid bal felső sarka
   const startX = map.sideSize === width ? minX : minX - 2
@@ -52,6 +48,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   }
 
   const handleCellClick = (x: number, y: number) => {
+    if (!dominoToPlace) return
     fetch(`${BACKEND_URL}api/kingdomino/domino/place`, {
       method: 'POST',
       headers: {
@@ -84,12 +81,12 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${gridWidth}, ${BASE_SIZE}px)`,
-        gridTemplateRows: `repeat(${gridHeight}, ${BASE_SIZE}px)`,
+        gridTemplateColumns: `repeat(${gridWidth}, ${baseSize}px)`,
+        gridTemplateRows: `repeat(${gridHeight}, ${baseSize}px)`,
         gap: '0px',
         position: 'relative',
-        width: BASE_SIZE * gridWidth,
-        height: BASE_SIZE * gridHeight,
+        width: baseSize * gridWidth,
+        height: baseSize * gridHeight,
         border: '2px solid #333',
       }}
     >
@@ -101,8 +98,8 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           <div
             key={`${x},${y}`}
             style={{
-              width: BASE_SIZE,
-              height: BASE_SIZE,
+              width: baseSize,
+              height: baseSize,
               border: '1px solid #ccc',
               boxSizing: 'border-box',
               background: '#fafafa',
@@ -126,10 +123,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`Domino ${dominoToPlace.value}`}
           style={{
             position: 'absolute',
-            left: (hoveredCell.x - startX) * BASE_SIZE,
-            top: (hoveredCell.y - startY) * BASE_SIZE,
-            width: 2 * BASE_SIZE,
-            height: BASE_SIZE,
+            left: (hoveredCell.x - startX) * baseSize,
+            top: (hoveredCell.y - startY) * baseSize,
+            width: 2 * baseSize,
+            height: baseSize,
             opacity: 0.5,
             pointerEvents: 'none',
             transform: `rotate(${-dominoToPlace.rot * 90}deg)`,
@@ -147,10 +144,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`Domino ${domino.value}`}
           style={{
             position: 'absolute',
-            left: (domino.x - startX) * BASE_SIZE,
-            top: (domino.y - startY) * BASE_SIZE,
-            width: 2 * BASE_SIZE,
-            height: BASE_SIZE,
+            left: (domino.x - startX) * baseSize,
+            top: (domino.y - startY) * baseSize,
+            width: 2 * baseSize,
+            height: baseSize,
             transform: `rotate(${-domino.rot * 90}deg)`,
             transformOrigin: '25% 50%',
             pointerEvents: 'none',
@@ -165,10 +162,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`${map.color} castle`}
           style={{
             position: 'absolute',
-            left: -startX * BASE_SIZE,
-            top: -startY * BASE_SIZE,
-            width: BASE_SIZE,
-            height: BASE_SIZE,
+            left: -startX * baseSize,
+            top: -startY * baseSize,
+            width: baseSize,
+            height: baseSize,
             pointerEvents: 'none',
           }}
         />

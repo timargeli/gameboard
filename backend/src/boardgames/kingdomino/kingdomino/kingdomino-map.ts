@@ -81,7 +81,7 @@ export class KingdominoMap {
     if (this.kingdominoOptions?.middle_bonus) {
       const border = this.getKingdomBorder()
       //TODO only add point if in endgame(?)
-      if (border.maxI === -border.minI && border.maxJ === -border.minJ) {
+      if (border.maxX === -border.minX && border.maxY === -border.minY) {
         this.points += 5
       }
     }
@@ -186,8 +186,8 @@ export class KingdominoMap {
     // Kilógás ellenőrzése
     const border = this.getKingdomBorder()
     cells.forEach((cell) => {
-      const marginI = this.sideSize - (border.maxI - border.minI + 1)
-      const marginJ = this.sideSize - (border.maxJ - border.minJ + 1)
+      const marginI = this.sideSize - border.height
+      const marginJ = this.sideSize - border.width
       if (
         cell.i < border.minI - marginI ||
         cell.i > border.maxI + marginI ||
@@ -249,11 +249,25 @@ export class KingdominoMap {
       })
     })
 
+    // Visszaváltás x, y koordinátákra
+    const minX = minJ - 6
+    const maxX = maxJ - 6
+    const minY = -maxI + 6
+    const maxY = -minI + 6
+    const width = maxJ - minJ + 1
+    const height = maxI - minI + 1
+
     return {
+      width,
+      height,
       minI,
       maxI,
       minJ,
       maxJ,
+      minX,
+      maxX,
+      minY,
+      maxY,
     }
   }
 

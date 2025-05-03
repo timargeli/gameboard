@@ -1,30 +1,24 @@
 import React from 'react'
-import { BASE_SIZE } from '../utils'
+import { translateColor } from '../utils'
 import { Turn } from './types'
 import { GameStateString } from '../types'
 
-const PLAYER_COLORS = [
-  '#4F8A8B', // Player 1
-  '#FBD46D', // Player 2
-  '#F76B8A', // Player 3
-  '#A3D2CA', // Player 4
-]
-
 type TurnSignProps = {
+  baseSize: number
   turn: Turn | null
   state: GameStateString
 }
 
-export const TurnSign: React.FC<TurnSignProps> = ({ turn, state }) => {
-  if (!turn) return <div style={{ width: BASE_SIZE * 2, height: BASE_SIZE / 2 }} />
+export const TurnSign: React.FC<TurnSignProps> = ({ baseSize, turn, state }) => {
+  if (!turn) return <div style={{ width: baseSize * 2, height: baseSize / 2 }} />
 
   return (
     <div
       style={{
-        width: BASE_SIZE * 2.5, // szélesebb téglalap
-        height: BASE_SIZE * 0.7, // alacsonyabb
-        borderRadius: BASE_SIZE * 0.2, // lekerekített sarkok
-        background: `${state === 'ended' ? '#ffb300' : turn.player.color}`,
+        width: baseSize * 2.5, // szélesebb téglalap
+        height: baseSize * 0.7, // alacsonyabb
+        borderRadius: baseSize * 0.2, // lekerekített sarkok
+        background: `${state === 'ended' ? '#6d4c29' : translateColor(turn.player.color)}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -33,18 +27,18 @@ export const TurnSign: React.FC<TurnSignProps> = ({ turn, state }) => {
         margin: '16px auto',
         fontFamily: 'Montserrat, Arial, sans-serif',
         fontWeight: 700,
-        fontSize: BASE_SIZE / 4,
+        fontSize: baseSize / 4,
         color: '#fff',
         letterSpacing: 1,
         transition: 'box-shadow 0.3s',
         position: 'relative',
         animation: 'pop 0.5s',
         whiteSpace: 'nowrap', // egy sorba kényszeríti a szöveget
-        padding: `0 ${BASE_SIZE / 3}px`,
+        padding: `0 ${baseSize / 3}px`,
       }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: BASE_SIZE / 5, opacity: 0.9 }}>
+        <span style={{ fontSize: baseSize / 5, opacity: 0.9 }}>
           {state === 'ended' ? 'A játéknak vége' : `It's player ${turn.player.id}'s turn to ${turn.action}`}
         </span>
       </span>

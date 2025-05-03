@@ -12,6 +12,7 @@ import { Topdeck } from './topdeck/types'
 import { useToast } from '../../toast-context'
 import { WinnerBoard } from './winner-board/winnerBoard'
 import { Trash } from './trash/trash'
+import { useWindowSize } from './utils'
 
 const SOCKET_URL = BACKEND_URL + 'kingdomino'
 
@@ -43,6 +44,9 @@ const Kingdomino: React.FC = () => {
   const [gameStateString, setGameStateString] = useState<GameStateString>('in_game')
   const [endgameResults, setEndgameResults] = useState<PlayerData[] | null>(null)
 
+  const size = useWindowSize()
+  const baseSize = Math.max(64, Math.min(256, size.width * 0.07))
+
   const { showToast } = useToast()
 
   // Socket ref, hogy ne hozzon létre minden rendernél újat
@@ -61,7 +65,7 @@ const Kingdomino: React.FC = () => {
       setTurn(gameState.turn)
       setTopdecks(gameState.topdecks)
       setGameStateString(gameState.gameState)
-      gameStateString === 'ended' && gameState.results && setEndgameResults(gameState.results)
+      gameState.results && setEndgameResults(gameState.results)
     })
 
     return () => {
@@ -110,18 +114,21 @@ const Kingdomino: React.FC = () => {
     }
   }, [turn])
 
-  console.log('engamde', endgameResults)
-
   return (
     <div
       style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5e1b7',
+        backgroundImage: 'url("/boardgames/kingdomino/wood-texture.png")',
+        backgroundRepeat: 'repeat',
+        backgroundSize: 'auto',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center', // TurnSign középre
         gap: 24, // távolság a sorok között
       }}
     >
-      <TurnSign turn={turn} state={gameStateString} />
+      <TurnSign turn={turn} state={gameStateString} baseSize={baseSize} />
       <div
         style={{
           display: 'flex',
@@ -135,16 +142,19 @@ const Kingdomino: React.FC = () => {
           setMap={setMap}
           dominoToPlace={dominoToPlace}
           setDominoToPlace={setDominoToPlace}
+          baseSize={baseSize}
           turn={turn}
           placeDomino={placeDomino}
         />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           {!endgameResults ? (
-            <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} />
+            <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} baseSize={baseSize} />
           ) : (
-            <WinnerBoard winners={endgameResults}></WinnerBoard>
+            <WinnerBoard winners={endgameResults} baseSize={baseSize}></WinnerBoard>
           )}
-          {dominoToPlace && <Trash dominoToPlace={dominoToPlace} turn={turn} placeDomino={placeDomino} />}
+          {dominoToPlace && (
+            <Trash dominoToPlace={dominoToPlace} turn={turn} placeDomino={placeDomino} baseSize={baseSize} />
+          )}
         </div>
       </div>
     </div>

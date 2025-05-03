@@ -1,5 +1,4 @@
 import React from 'react'
-import { BASE_SIZE } from '../utils'
 import { Topdeck } from './types'
 import { Turn } from '../turn-sign/types'
 
@@ -7,9 +6,10 @@ type DominoProps = {
   domino: Topdeck
   turn: Turn | null
   chooseDomino: (drawnDominoId: number) => void
+  baseSize: number
 }
 
-export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino }) => {
+export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino, baseSize }) => {
   const handleClick = async () => {
     if (domino.color) return // ha van color, ne csináljon semmit
     chooseDomino(domino.id)
@@ -19,8 +19,8 @@ export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino }) =>
     <div
       style={{
         position: 'relative',
-        width: 2 * BASE_SIZE,
-        height: BASE_SIZE,
+        width: 2 * baseSize,
+        height: baseSize,
         display: 'inline-block',
         pointerEvents: domino.color ? 'none' : 'auto',
       }}
@@ -32,8 +32,8 @@ export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino }) =>
         src={`/boardgames/kingdomino/tiles/${domino.value}.png`}
         alt={`Domino ${domino.value}`}
         style={{
-          width: 2 * BASE_SIZE,
-          height: BASE_SIZE,
+          width: 2 * baseSize,
+          height: baseSize,
           opacity: domino.value === turn?.drawnDomino?.value ? 0.5 : 1,
           pointerEvents: 'none',
           display: 'block',
@@ -47,8 +47,8 @@ export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino }) =>
             position: 'absolute',
             left: '50%',
             top: '50%',
-            width: BASE_SIZE / 2,
-            height: BASE_SIZE / 2,
+            width: baseSize / 2,
+            height: baseSize / 2,
             opacity: domino.value === turn?.drawnDomino?.value ? 0.5 : 1,
             transform: 'translate(-50%, -50%)',
             pointerEvents: 'none',

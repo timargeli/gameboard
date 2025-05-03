@@ -7,9 +7,10 @@ type TopdecksProps = {
   turn: Turn | null
   topdecks: Topdeck[][]
   chooseDomino: (drawnDominoId: number) => void
+  baseSize: number
 }
 
-export const Topdecks: React.FC<TopdecksProps> = ({ chooseDomino, turn, topdecks }) => {
+export const Topdecks: React.FC<TopdecksProps> = ({ chooseDomino, turn, topdecks, baseSize }) => {
   return (
     <div
       style={{
@@ -20,7 +21,7 @@ export const Topdecks: React.FC<TopdecksProps> = ({ chooseDomino, turn, topdecks
       }}
     >
       {topdecks?.map((td, i) => (
-        <TopdeckColumn key={i} dominos={td} turn={turn} chooseDomino={chooseDomino} />
+        <TopdeckColumn key={i} dominos={td} turn={turn} chooseDomino={chooseDomino} baseSize={baseSize} />
       ))}
     </div>
   )

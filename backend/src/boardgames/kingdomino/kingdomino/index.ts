@@ -7,10 +7,9 @@ import {
 } from '../../../database/database'
 import { KdKingdominoDomino, KdPlayer, Kingdomino } from '../../../database/generated'
 import { getDomino, endGame } from '../../../database/utils'
-import { getEndgameResults } from '../game'
 import { KingdominoMap } from './kingdomino-map'
-import { BulkInsertKDKingdominoDomino, Turn, TurnWithPlayer } from './types'
-import { getGameId, getGameState, getGameStateString, getPlayer } from './utils'
+import { BulkInsertKDKingdominoDomino, Turn } from './types'
+import { getGameId, getGameStateString, getPlayer } from './utils'
 
 export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   if (!kingdomino) {
@@ -177,13 +176,10 @@ export const placeDomino = async (
       const gameId = await getGameId(drawnDomino.kingdomino_id)
       await endGame(gameId)
       const border = kingdominoMap.getKingdomBorder()
-      const minX = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
-      const minY = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
-      const width = border.maxJ - border.minJ + 1
-      const height = border.maxI - border.minI + 1
+
       return {
         message: 'Utolsó dominó beépítése sikerült, a játék véget ért',
-        map: { ...kingdominoMap, dimensions: { width, height, minX, minY } },
+        map: { ...kingdominoMap, dimensions: border },
       }
     }
   }
@@ -194,15 +190,11 @@ export const placeDomino = async (
   // temporary, prints map to console
   kingdominoMap.printMap()
   const border = kingdominoMap.getKingdomBorder()
-  const minX = border.minI - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.x), 0)
-  const minY = border.minJ - 6 //Math.min(...kingdomMap.dominos.map((dom) => dom.y), 0)
-  const width = border.maxJ - border.minJ + 1
-  const height = border.maxI - border.minI + 1
 
   return {
     message: inTrash ? 'Dominó kukába helyezve' : 'Dominó beépítése sikerült',
     points: points,
-    map: { ...kingdominoMap, dimensions: { width, height, minX, minY } },
+    map: { ...kingdominoMap, dimensions: border },
   }
 }
 

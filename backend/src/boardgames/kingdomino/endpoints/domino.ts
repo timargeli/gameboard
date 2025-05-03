@@ -1,15 +1,5 @@
-import {
-  db,
-  kd_kingdom_dominoTable,
-  kd_kingdomino_dominoTable,
-  kd_playerTable,
-} from '../../../database/database'
-import { endGame, getDomino } from '../../../database/utils'
 import { Endpoint } from '../../../types'
-import { getEndgameResults } from '../game'
-import { chooseDomino, draw, getTurn, placeDomino } from '../kingdomino'
-import { KingdominoMap } from '../kingdomino/kingdomino-map'
-import { getGameId } from '../kingdomino/utils'
+import { chooseDomino, placeDomino } from '../kingdomino'
 
 const basePath = '/domino'
 

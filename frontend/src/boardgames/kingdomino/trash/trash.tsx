@@ -1,5 +1,4 @@
 import React from 'react'
-import { BASE_SIZE } from '../utils'
 import { DominoToPlace } from '../kingdom/types'
 import { BACKEND_URL } from '../../../types'
 import { useToast } from '../../../toast-context'
@@ -9,9 +8,10 @@ type TrashProps = {
   dominoToPlace: DominoToPlace | null
   turn: Turn | null
   placeDomino: () => void
+  baseSize: number
 }
 
-export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn }) => {
+export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn, baseSize }) => {
   const { showToast } = useToast()
 
   const handleClick = () => {
@@ -43,13 +43,13 @@ export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn }
   return (
     <div
       style={{
-        width: BASE_SIZE,
-        height: BASE_SIZE,
+        width: baseSize,
+        height: baseSize,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         background: '#eee',
-        borderRadius: BASE_SIZE * 0.1,
+        borderRadius: baseSize * 0.1,
         boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
         border: '2px solid #888',
         cursor: 'pointer',
@@ -63,8 +63,8 @@ export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn }
         src="/boardgames/kingdomino/bin.png"
         alt="Bin"
         style={{
-          width: BASE_SIZE * 0.8,
-          height: BASE_SIZE * 0.8,
+          width: baseSize * 0.8,
+          height: baseSize * 0.8,
           objectFit: 'contain',
           display: 'block',
         }}

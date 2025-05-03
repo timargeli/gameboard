@@ -1,22 +1,23 @@
 import React from 'react'
-import { BASE_SIZE } from '../utils'
 import { PlayerData } from '../types'
+import { translateColor } from '../utils'
 
 type WinnerBoardProps = {
   winners: PlayerData[]
+  baseSize: number
 }
 
-const scale = BASE_SIZE / 2
-
-export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners }) => {
+export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners, baseSize }) => {
   if (!winners.length) return null
+
+  const scale = baseSize / 2
 
   return (
     <div
       style={{
         margin: '32px auto',
         padding: `${scale / 2}px ${scale}px`,
-        background: 'linear-gradient(90deg, #ffe259 0%, #ffa751 100%)',
+        background: '#6d4c29',
         borderRadius: scale * 0.3,
         boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
         border: '4px solid white',
@@ -32,7 +33,7 @@ export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners }) => {
         animation: 'pop 0.7s',
       }}
     >
-      <div style={{ fontSize: scale / 2, marginBottom: 12, color: '#b8860b', letterSpacing: 2 }}>
+      <div style={{ fontSize: scale / 2, marginBottom: 12, color: '#ffd700', letterSpacing: 2 }}>
         🏆Gratulálunk!🏆
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -42,9 +43,9 @@ export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners }) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-              background: player.color,
+              justifyContent: 'space-between',
+              //gap: 16,
+              background: translateColor(player.color),
               color: '#fff',
               borderRadius: scale * 0.2,
               padding: `8px ${scale / 2}px`,
@@ -54,7 +55,7 @@ export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners }) => {
             }}
           >
             <span style={{ fontWeight: 900 }}>{player.name}</span>
-            <span style={{ fontSize: scale / 4, opacity: 0.85 }}>({player.points} pont)</span>
+            <span style={{ fontSize: scale / 3 }}> {player.points} pont</span>
           </div>
         ))}
       </div>
