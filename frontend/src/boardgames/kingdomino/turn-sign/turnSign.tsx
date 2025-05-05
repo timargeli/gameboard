@@ -2,6 +2,7 @@ import React from 'react'
 import { translateColor } from '../utils'
 import { Turn } from './types'
 import { GameStateString } from '../types'
+import { DefaultColors } from '../../../types'
 
 type TurnSignProps = {
   baseSize: number
@@ -15,10 +16,10 @@ export const TurnSign: React.FC<TurnSignProps> = ({ baseSize, turn, state }) => 
   return (
     <div
       style={{
-        width: baseSize * 2.5, // szélesebb téglalap
-        height: baseSize * 0.7, // alacsonyabb
-        borderRadius: baseSize * 0.2, // lekerekített sarkok
-        background: `${state === 'ended' ? '#6d4c29' : translateColor(turn.player.color)}`,
+        width: baseSize * 2.5,
+        height: baseSize * 0.7,
+        borderRadius: baseSize * 0.2,
+        background: `${state === 'ended' ? DefaultColors.BROWN : translateColor(turn.player.color)}`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

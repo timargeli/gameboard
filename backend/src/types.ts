@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { Lobby } from './boardgames/kingdomino/types'
 
 export enum GameStateString {
   waiting = 'waiting',
@@ -19,4 +20,8 @@ export type OptionDescriptor = {
   optionName: string
   optionDisplayName: string
   optionType: string
+}
+
+export type LobbyItem = Lobby & {
+  player_names: string
 }

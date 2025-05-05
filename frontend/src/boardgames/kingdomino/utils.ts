@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react'
+import { DefaultColors } from '../../types'
 
 export const BASE_SIZE = 96
 
 export const translateColor = (color: string) => {
   switch (color) {
     case 'blue':
-      return '#2563eb'
+      return DefaultColors.BLUE
     case 'green':
-      return '#16a34a'
+      return DefaultColors.GREEN
     case 'yellow':
-      return '#facc15'
+      return DefaultColors.YELLOW
     case 'pink':
-      return '#ec4899'
+      return DefaultColors.PINK
+    case 'brown':
+      return DefaultColors.BROWN
     default:
       return 'black'
   }

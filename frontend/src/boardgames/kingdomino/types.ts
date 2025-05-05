@@ -54,7 +54,7 @@ export type Lobby = {
   game_name: GameName
   game?: number | Game | null
   game_options?: number | GameOptions | null
-  players: number[] | User[]
+  players: number[]
   min_players: number
   max_players: number
   date_created: string

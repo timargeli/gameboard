@@ -1,6 +1,7 @@
 import React from 'react'
 import { PlayerData } from '../types'
 import { translateColor } from '../utils'
+import { DefaultColors } from '../../../types'
 
 type WinnerBoardProps = {
   winners: PlayerData[]
@@ -17,7 +18,7 @@ export const WinnerBoard: React.FC<WinnerBoardProps> = ({ winners, baseSize }) =
       style={{
         margin: '32px auto',
         padding: `${scale / 2}px ${scale}px`,
-        background: '#6d4c29',
+        background: DefaultColors.BROWN,
         borderRadius: scale * 0.3,
         boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
         border: '4px solid white',

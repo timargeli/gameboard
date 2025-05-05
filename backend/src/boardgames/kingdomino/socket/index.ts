@@ -1,11 +1,11 @@
 import { Server } from 'socket.io'
 import { getGameState } from '../kingdomino/utils'
-import { chooseDomino, placeDomino } from '../kingdomino'
+import { chooseDomino } from '../kingdomino'
 
 export const setupKingdominoSockets = (io: Server) => {
   // Példa: Socket.IO események
   io.of('/kingdomino').on('connection', (socket) => {
-    console.log('Új kliens csatlakozott:', socket.id)
+    console.log('Új kliens csatlakozott kingdominohoz:', socket.id)
 
     socket.on('join-game', async ({ kingdominoId, playerId }) => {
       socket.join(kingdominoId) // <-- szoba az adott játékhoz
@@ -38,7 +38,7 @@ export const setupKingdominoSockets = (io: Server) => {
     })
 
     socket.on('disconnect', () => {
-      console.log('Kliens lecsatlakozott:', socket.id)
+      console.log('Kliens lecsatlakozott kingdominóból:', socket.id)
     })
   })
 }

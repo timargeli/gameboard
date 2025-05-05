@@ -52,9 +52,17 @@ export const lobbyEndpoints: Endpoint[] = [
 
         // TODO self id
         // TODO user already in validation
-        const selfUserId = 1
+        const selfUserId = 2
 
         const lobby = await getLobby(lobbyId)
+
+        if (lobby.players?.length && lobby.players.includes(-1)) {
+          throw new Error('User already in lobby')
+        }
+
+        if (lobby.state !== 'waiting') {
+          throw new Error('Game already ' + lobby.state)
+        }
 
         const [result] = await lobbyTable(db).update(
           { id: lobbyId },
