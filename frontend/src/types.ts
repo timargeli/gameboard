@@ -15,4 +15,5 @@ export enum DefaultColors {
 
 export type LobbyItem = Lobby & {
   player_names: string
+  boardgame: number | null
 }

@@ -33,30 +33,38 @@ export const Lobbies: React.FC = () => {
   }, [])
 
   const handleJoin = (id: number) => {
-    fetch(`${BACKEND_URL}api/lobby/join`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId: 1, // TODO SELF userid and delete join-temp endpoint
-        lobbyId: id,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((data) => {
-            throw new Error(data.error || 'Valami hiba történt!')
-          })
-        }
-        return response.json()
+    // Ha már eleve bennevagyunk, nem join, csak átirányítás
+    const lobby = lobbies.find((l) => (l.id = id))
+    // TODO self user id ide
+    if (lobby?.players.includes(-1)) {
+      socketRef.current?.emit('join-lobby', { lobbyId: id })
+      navigate(`${id}`)
+    } else {
+      fetch(`${BACKEND_URL}api/lobby/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 1, // TODO SELF userid and delete join-temp endpoint
+          lobbyId: id,
+        }),
       })
-      // socket bűvészkedéseket ide
-      .then(() => socketRef.current?.emit('join-lobby', { lobbyId: id }))
-      .then(() => navigate(`${id}`))
-      .catch((error) => {
-        showToast(error.message || 'Ismeretlen hiba történt!', 'error')
-      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((data) => {
+              throw new Error(data.error || 'Valami hiba történt!')
+            })
+          }
+          return response.json()
+        })
+        // socket bűvészkedéseket ide
+        .then(() => socketRef.current?.emit('join-lobby', { lobbyId: id }))
+        .then(() => navigate(`${id}`))
+        .catch((error) => {
+          showToast(error.message || 'Ismeretlen hiba történt!', 'error')
+        })
+    }
   }
 
   // TODO refreshelje a lobbiest (ne endpoint csinálja a törlést pl)

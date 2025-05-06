@@ -3,6 +3,7 @@ import { db, game_optionsTable, gameTable, lobbyTable } from '../database/databa
 import { Lobby_InsertParameters } from '../database/generated'
 import { getLobby } from '../database/utils'
 import { Endpoint, GameStateString } from '../types'
+import { getLobby as getLobbyWithBg } from '../utils'
 
 const basePath = '/lobby'
 
@@ -145,8 +146,9 @@ export const lobbyEndpoints: Endpoint[] = [
 
         //update lobby
         await lobbyTable(db).update({ id: lobbyId }, { game: game.id, state: GameStateString.inGame })
+        const newLobby = await getLobbyWithBg(lobbyId)
 
-        res.status(201).json({ message: 'Lobby started' })
+        res.status(201).json({ message: 'Lobby started', lobby: newLobby })
       } catch (error) {
         console.log('Error starting lobby')
         console.log(error)

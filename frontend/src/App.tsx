@@ -4,20 +4,16 @@ import Kingdomino from './boardgames/kingdomino/kingdomino'
 import { ToastProvider } from './toast-context'
 import { Login } from './pages/login'
 import { Lobbies } from './pages/lobbies'
+import { Lobby } from './pages/lobby'
 
 function App() {
-  // NEM ITT
-  // const navigate = useNavigate()
-  // Ha nincs loginelve:
-  // navigate('/login')
-
   return (
     <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/lobbies" element={<Lobbies />} />
-          {/* <Route path="/lobbies:lobbyId" element={<Lobby />} /> */}
+          <Route path="/lobbies/:lobbyId" element={<Lobby />} />
           <Route path="/games/kingdomino/:kingdominoId" element={<Kingdomino />} />
         </Routes>
       </BrowserRouter>

@@ -1,5 +1,5 @@
 import { Server } from 'socket.io'
-import { getLobbies } from '../utils'
+import { getLobbies, getLobby, leaveFromLobby } from '../utils'
 
 export const setupLobbySockets = (io: Server) => {
   io.of('/lobbies').on('connection', (socket) => {
@@ -17,15 +17,19 @@ export const setupLobbySockets = (io: Server) => {
       // Frissítés a többieknek
       const lobbies = await getLobbies()
       io.of('/lobbies').emit('lobbies', lobbies)
-      //   const lobby = await getLobby(lobbyId)
-      //   io.of('/lobbies').to(lobbyId).emit('lobby', lobby)
+      const lobby = await getLobby(lobbyId)
+      io.of('/lobbies').to(lobbyId).emit('lobby', lobby)
     })
 
     // Leave from a lobby
-    socket.on('leave-lobby', async ({ lobbyId }) => {
-      socket.join(lobbyId)
-      //   const lobby = await getLobby(lobbyId)
-      //   io.of('/lobbies').to(lobbyId).emit('lobby', lobby)
+    socket.on('leave-lobby', async ({ lobbyId, userId }) => {
+      await leaveFromLobby(lobbyId, userId)
+      // Frissítés a többieknek
+      const lobbies = await getLobbies()
+      io.of('/lobbies').emit('lobbies', lobbies)
+      // Frissítés a többieknek a lobbiban
+      const lobby = await getLobby(lobbyId)
+      io.of('/lobbies').to(lobbyId).emit('lobby', lobby)
     })
 
     socket.on('disconnect', () => {

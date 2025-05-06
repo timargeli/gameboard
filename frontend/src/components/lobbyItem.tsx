@@ -15,7 +15,7 @@ type LobbyItemProps = {
   handleDelete: (id: number) => void
 }
 
-const getStateString = (state: string) => {
+export const getStateString = (state: string) => {
   switch (state) {
     case 'waiting':
       return 'Várakozás 🟢'
@@ -84,7 +84,7 @@ export const LobbyItem: React.FC<LobbyItemProps> = ({
       </div>
       {/* Bottom row / Buttons */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-        <Button onClick={() => handleJoin(id)}>Csatlakozás</Button>
+        <Button onClick={() => handleJoin(id)}>{players.includes(-1) ? 'Belépés' : 'Csatlakozás'}</Button>
         <Button onClick={() => handleDelete(id)} variant="delete" disabled={state === 'in_game'}>
           Törlés
         </Button>

@@ -24,4 +24,5 @@ export type OptionDescriptor = {
 
 export type LobbyItem = Lobby & {
   player_names: string
+  boardgame: number | null
 }
