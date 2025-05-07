@@ -81,7 +81,9 @@ export const gameoptionsEndpoints: Endpoint[] = [
               game_name: 'kingdomino',
               kingdomino_options: newKingdominoOptions,
             })
-            res.status(201).json(newOptions[0]?.id)
+            res
+              .status(201)
+              .json({ message: 'Sikeres gameOptions létrehozás', gameOptionsId: newOptions[0]?.id })
             break
           default:
             throw new Error('Nem létező játéktípus')

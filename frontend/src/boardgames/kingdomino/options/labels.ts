@@ -15,3 +15,8 @@ export const kingdominoOptionLabels = [
     optionType: 'boolean',
   },
 ]
+
+export const playerOptions = {
+  minPlayerOptions: [2, 3, 4],
+  maxPlayerOptions: [2, 3, 4],
+}

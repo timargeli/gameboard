@@ -5,18 +5,53 @@ import { ToastProvider } from './toast-context'
 import { Login } from './pages/login'
 import { Lobbies } from './pages/lobbies'
 import { Lobby } from './pages/lobby'
+import { CreateLobby } from './pages/createLobby'
+import { AuthProvider, HomeRedirect, RequireAuth } from './auth-context'
 
 function App() {
   return (
     <ToastProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/lobbies" element={<Lobbies />} />
-          <Route path="/lobbies/:lobbyId" element={<Lobby />} />
-          <Route path="/games/kingdomino/:kingdominoId" element={<Kingdomino />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomeRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/lobbies"
+              element={
+                <RequireAuth>
+                  <Lobbies />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/lobbies/:lobbyId"
+              element={
+                <RequireAuth>
+                  <Lobby />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/lobbies/+"
+              element={
+                <RequireAuth>
+                  <CreateLobby />
+                </RequireAuth>
+              }
+            />
+
+            <Route
+              path="/games/kingdomino/:kingdominoId"
+              element={
+                <RequireAuth>
+                  <Kingdomino />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ToastProvider>
   )
 }

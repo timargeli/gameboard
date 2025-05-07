@@ -17,6 +17,9 @@ export const userEndpoints: Endpoint[] = [
         }
         // Checking for an existing user with this name
         const existingUser = await usersTable(db).findOne({ name })
+        if (existingUser?.password && existingUser.password !== password) {
+          throw new Error('Helytelen jelszó')
+        }
         let newUser
         // Creating a new one if nothing has been found
         if (!existingUser) {

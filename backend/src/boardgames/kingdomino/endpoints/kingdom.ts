@@ -1,6 +1,7 @@
 import { db, kd_playerTable } from '../../../database/database'
 import { Endpoint } from '../../../types'
 import { KingdominoMap } from '../kingdomino/kingdomino-map'
+import { getPlayerFromUser } from '../kingdomino/utils'
 
 const basePath = '/kingdom'
 
@@ -34,15 +35,13 @@ export const kingdomEndpoints: Endpoint[] = [
     path: basePath + '/get-map',
     handler: async (req, res) => {
       try {
-        const { playerId, kingdominoId } = req.body
-        if (!playerId || !kingdominoId) {
-          throw new Error('player id és Kingdomino id megadása kötelező')
-        }
-        // TODO itt user lesz majd nem player, kicsit bonyibb lekérdezés
+        const { userId, kingdominoId } = req.body
 
-        const kingdomId = (await kd_playerTable(db).findOne({ id: playerId }))?.kingdom
+        const player = await getPlayerFromUser(userId, kingdominoId)
+
+        const kingdomId = (await kd_playerTable(db).findOne({ id: player.id }))?.kingdom
         if (!kingdomId) {
-          throw new Error('Nincs kingdom a playerhez: ' + playerId)
+          throw new Error('Nincs kingdom a playerhez: ' + player.id)
         }
 
         const kingdomMap = new KingdominoMap()

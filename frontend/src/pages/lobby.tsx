@@ -6,7 +6,8 @@ import { BACKEND_URL, DefaultColors, LobbyItem } from '../types'
 import { Button } from '../components/button'
 import io, { Socket } from 'socket.io-client'
 import { useToast } from '../toast-context'
-import { Gameoptions } from '../components/gameoptions'
+import { GameoptionsTable } from '../components/gameoptionsTable'
+import { useAuth } from '../auth-context'
 
 const SOCKET_URL = BACKEND_URL + 'lobbies'
 
@@ -16,6 +17,8 @@ export const Lobby: React.FC = () => {
   const navigate = useNavigate()
   const { lobbyId } = useParams()
   const { showToast } = useToast()
+
+  const { userId } = useAuth()
 
   useEffect(() => {
     if (!lobbyId) return
@@ -63,8 +66,10 @@ export const Lobby: React.FC = () => {
       })
   }
 
+  console.log('Lobby', lobby)
+
   const handleLeaveLobby = () => {
-    socketRef.current?.emit('leave-lobby', { lobbyId, userId: -1 })
+    socketRef.current?.emit('leave-lobby', { lobbyId, userId })
   }
 
   const playerCountText = `Játékosok száma: ${
@@ -177,7 +182,7 @@ export const Lobby: React.FC = () => {
         >
           {lobby.player_names}
         </div>
-        <Gameoptions lobby={lobby} />
+        <GameoptionsTable lobby={lobby} />
       </div>
       {/* Gombok legalul */}
       <div

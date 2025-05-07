@@ -7,16 +7,16 @@ export const setupKingdominoSockets = (io: Server) => {
   io.of('/kingdomino').on('connection', (socket) => {
     console.log('Új kliens csatlakozott kingdominohoz:', socket.id)
 
-    socket.on('join-game', async ({ kingdominoId, playerId }) => {
+    socket.on('join-game', async ({ kingdominoId, userId }) => {
       socket.join(kingdominoId) // <-- szoba az adott játékhoz
       const gameState = await getGameState(kingdominoId)
       io.of('/kingdomino').to(kingdominoId).emit('game-state', gameState)
     })
 
-    socket.on('choose-domino', async ({ kingdominoId, drawnDominoId, playerId }, callback) => {
+    socket.on('choose-domino', async ({ kingdominoId, drawnDominoId, userId }, callback) => {
       try {
         // TODO a chooseDomino visszatár a turnnel, azt bele gamesattetbe
-        await chooseDomino(Number(drawnDominoId), Number(playerId))
+        await chooseDomino(Number(drawnDominoId), Number(userId))
         const gameState = await getGameState(Number(kingdominoId))
         io.of('/kingdomino').to(kingdominoId).emit('game-state', gameState)
         // Sikeres válasz a kliensnek
@@ -27,7 +27,7 @@ export const setupKingdominoSockets = (io: Server) => {
       }
     })
 
-    socket.on('place-domino', async ({ kingdominoId, x, y, rot, inTrash, drawnDominoId, playerId }) => {
+    socket.on('place-domino', async ({ kingdominoId, x, y, rot, inTrash, drawnDominoId, userId }) => {
       // ...játéklogika
       // Broadcast az adott játék szobájába:
       // Ezt csinálhatja az endpoint, itt csak broadcastelünk

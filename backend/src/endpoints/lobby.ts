@@ -13,7 +13,7 @@ export const lobbyEndpoints: Endpoint[] = [
     path: basePath + '/create',
     handler: async (req, res) => {
       try {
-        const { gameName, gameOptions, minPlayers, maxPLayers } = req.body
+        const { gameName, gameOptions, minPlayers, maxPlayers } = req.body
         if (!gameName) {
           throw new Error('Játék megadása kötelező')
         }
@@ -23,7 +23,7 @@ export const lobbyEndpoints: Endpoint[] = [
         if (!minPlayers) {
           throw new Error('Minimum játékosok számának megadása kötelező')
         }
-        if (!maxPLayers) {
+        if (!maxPlayers) {
           throw new Error('Maxmimum játékosok számának megadása kötelező')
         }
         const lobby: Lobby_InsertParameters = {
@@ -31,7 +31,7 @@ export const lobbyEndpoints: Endpoint[] = [
           game_name: gameName,
           game_options: gameOptions,
           min_players: minPlayers,
-          max_players: maxPLayers,
+          max_players: maxPlayers,
           players: [], //TODO add self user
           date_created: new Date(),
         }
@@ -49,15 +49,15 @@ export const lobbyEndpoints: Endpoint[] = [
     path: basePath + '/join',
     handler: async (req, res) => {
       try {
-        const { lobbyId } = req.body
-
-        // TODO self id
-        // TODO user already in validation
-        const selfUserId = 2
+        const { lobbyId, userId } = req.body
 
         const lobby = await getLobby(lobbyId)
 
-        if (lobby.players?.length && lobby.players.includes(-1)) {
+        if (!userId) {
+          throw new Error('UserId megadása kötelező!')
+        }
+
+        if (lobby.players?.length && lobby.players.includes(userId)) {
           throw new Error('User already in lobby')
         }
 
@@ -67,7 +67,7 @@ export const lobbyEndpoints: Endpoint[] = [
 
         const [result] = await lobbyTable(db).update(
           { id: lobbyId },
-          { players: (lobby.players || []).concat(selfUserId) },
+          { players: (lobby.players || []).concat(userId) },
         )
 
         res.status(201).json({ message: 'Joined lobby', lobby: result })
@@ -78,6 +78,7 @@ export const lobbyEndpoints: Endpoint[] = [
       }
     },
   },
+  // TODO delete temp
   {
     endpointType: 'post',
     path: basePath + '/join-temp',

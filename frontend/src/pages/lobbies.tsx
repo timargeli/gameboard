@@ -5,12 +5,16 @@ import { BACKEND_URL, LobbyItem as Lobby } from '../types'
 import io, { Socket } from 'socket.io-client'
 import { useToast } from '../toast-context'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/button'
+import { useAuth } from '../auth-context'
 
 const SOCKET_URL = BACKEND_URL + 'lobbies'
 
 export const Lobbies: React.FC = () => {
   const [lobbies, setLobbies] = useState<Lobby[]>([])
   const socketRef = useRef<typeof Socket | null>(null)
+
+  const { userId, logout } = useAuth()
 
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -35,8 +39,7 @@ export const Lobbies: React.FC = () => {
   const handleJoin = (id: number) => {
     // Ha már eleve bennevagyunk, nem join, csak átirányítás
     const lobby = lobbies.find((l) => (l.id = id))
-    // TODO self user id ide
-    if (lobby?.players.includes(-1)) {
+    if (lobby?.players.includes(userId || -1)) {
       socketRef.current?.emit('join-lobby', { lobbyId: id })
       navigate(`${id}`)
     } else {
@@ -46,7 +49,7 @@ export const Lobbies: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 1, // TODO SELF userid and delete join-temp endpoint
+          userId,
           lobbyId: id,
         }),
       })
@@ -131,6 +134,10 @@ export const Lobbies: React.FC = () => {
         {lobbies.map((lobby) => (
           <LobbyItem key={lobby.id} {...lobby} handleJoin={handleJoin} handleDelete={handleDelete} />
         ))}
+      </div>
+      <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 18 }}>
+        <Button onClick={() => navigate('/lobbies/+')}>Lobbi létrehozása</Button>
+        <Button onClick={logout}>Kijelentkezés</Button>
       </div>
     </div>
   )

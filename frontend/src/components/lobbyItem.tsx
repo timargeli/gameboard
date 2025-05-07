@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from './button'
 import { DefaultColors } from '../types'
+import { useAuth } from '../auth-context'
 
 type LobbyItemProps = {
   id: number
@@ -42,6 +43,8 @@ export const LobbyItem: React.FC<LobbyItemProps> = ({
 }) => {
   const dateString = new Date(date_created).toLocaleString('hu-HU')
 
+  const { userId } = useAuth()
+
   return (
     <div
       style={{
@@ -76,7 +79,7 @@ export const LobbyItem: React.FC<LobbyItemProps> = ({
         {player_names}
       </div>
       {/* Player cnt and date */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#888' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, color: '#555' }}>
         <span>
           {players.length || 0} / {min_players}-{max_players}
         </span>
@@ -84,7 +87,9 @@ export const LobbyItem: React.FC<LobbyItemProps> = ({
       </div>
       {/* Bottom row / Buttons */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-        <Button onClick={() => handleJoin(id)}>{players.includes(-1) ? 'Belépés' : 'Csatlakozás'}</Button>
+        <Button onClick={() => handleJoin(id)}>
+          {players.includes(userId || -1) ? 'Belépés' : 'Csatlakozás'}
+        </Button>
         <Button onClick={() => handleDelete(id)} variant="delete" disabled={state === 'in_game'}>
           Törlés
         </Button>

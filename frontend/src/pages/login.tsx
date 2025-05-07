@@ -1,10 +1,43 @@
 import React, { useState } from 'react'
-import { DefaultColors } from '../types'
+import { BACKEND_URL, DefaultColors } from '../types'
 import { Button } from '../components/button'
+import { useAuth } from '../auth-context'
+import { useToast } from '../toast-context'
+import { useNavigate } from 'react-router-dom'
 
 export const Login: React.FC = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+
+  const navigate = useNavigate()
+  const { showToast } = useToast()
+  const { setUserId } = useAuth()
+
+  const handleLogin = () => {
+    fetch(`${BACKEND_URL}api/users/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: username,
+        password,
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.error || 'Valami hiba történt!')
+          })
+        }
+        return response.json()
+      })
+      .then((data) => data?.user?.id && setUserId(data.user.id))
+      .then(() => navigate('/lobbies'))
+      .catch((error) => {
+        showToast(error.message || 'Ismeretlen hiba történt!', 'error')
+      })
+  }
 
   return (
     <div
@@ -61,7 +94,7 @@ export const Login: React.FC = () => {
             outline: 'none',
           }}
         />
-        <Button>Bejelentkezés / Regisztráció</Button>
+        <Button onClick={handleLogin}>Bejelentkezés / Regisztráció</Button>
       </div>
     </div>
   )

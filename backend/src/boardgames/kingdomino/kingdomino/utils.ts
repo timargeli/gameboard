@@ -10,7 +10,7 @@ import {
 } from '../../../database/database'
 import { KdPlayer, Kingdomino } from '../../../database/generated'
 import { getEndgameResults } from '../game'
-import { Cell, CellType, GameState, GameStateString } from '../types'
+import { Cell, CellType, GameState, GameStateString, User } from '../types'
 import { PlacedDominoJoined, Topdeck } from './types'
 
 // Egy dominóból két cellát számol, forgatás és pozicó alapján
@@ -110,6 +110,30 @@ export const getPlayer = async (playerId: KdPlayer['id']) => {
   const player = await kd_playerTable(db).findOne({ id: playerId })
   if (!player) {
     throw new Error('Nincs ilyen id-jú player: ' + playerId)
+  }
+  return player
+}
+
+export const getPlayerFromUser = async (userId?: User['id'], kingdominoId?: Kingdomino['id']) => {
+  if (!userId || !kingdominoId) {
+    throw new Error('User id és Kingdomino id megadása kötelező')
+  }
+  const players = await db.query(sql`
+      SELECT p.*
+      FROM kd_player p
+      JOIN kd_kingdom k on p.kingdom = k.id
+      WHERE p.user = ${userId}
+      AND k.kingdomino_id = ${kingdominoId};
+    `)
+  if (!players.length) {
+    throw new Error(`Nem található játékos a megadott userId ${userId} és kingdominoId ${kingdominoId}-hez`)
+  }
+  if (players.length !== 1) {
+    throw new Error('Több játékost is találtunk: ' + JSON.stringify(players))
+  }
+  const player = players[0] as KdPlayer
+  if (!player?.id) {
+    throw new Error('Nincs player a megadott userhez: ' + userId)
   }
   return player
 }

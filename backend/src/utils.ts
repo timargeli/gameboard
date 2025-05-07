@@ -48,13 +48,14 @@ export const getLobby = async (lobbyId: number): Promise<LobbyItem> => {
       SELECT bg.*
       FROM lobby l
       JOIN game g on g.id = l.game
-      JOIN boardgame bg on bg.id = g.boardgame;
+      JOIN boardgame bg on bg.id = g.boardgame
+      WHERE l.id = ${lobbyId};
     `)
   )[0] as Boardgame
 
   switch (lobby.game_name) {
     case 'kingdomino':
-      return { ...lobby, boardgame: boardgame.kingdomino }
+      return { ...lobby, boardgame: boardgame?.kingdomino }
     default:
       return lobby
   }

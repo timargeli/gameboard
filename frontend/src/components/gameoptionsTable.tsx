@@ -2,11 +2,11 @@ import React from 'react'
 import { LobbyItem } from '../types'
 import { KingdominoOptionsTable } from '../boardgames/kingdomino/options/kingdominoOptionsTable'
 
-type GameoptionsProps = {
+type GameoptionsTableProps = {
   lobby: LobbyItem
 }
 
-export const Gameoptions: React.FC<GameoptionsProps> = ({ lobby }) => {
+export const GameoptionsTable: React.FC<GameoptionsTableProps> = ({ lobby }) => {
   switch (lobby.game_name) {
     case 'kingdomino':
       return <KingdominoOptionsTable lobbyId={lobby.id} />

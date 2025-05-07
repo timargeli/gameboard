@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { KingdomMap } from './kingdom/kingdomMap'
 import { TurnSign } from './turn-sign/turnSign'
 import { Topdecks } from './topdeck/topdecks'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { BACKEND_URL } from '../../types'
 import { Turn } from './turn-sign/types'
 import { DominoToPlace, KingdominoMap } from './kingdom/types'
@@ -13,6 +13,7 @@ import { useToast } from '../../toast-context'
 import { WinnerBoard } from './winner-board/winnerBoard'
 import { Trash } from './trash/trash'
 import { useWindowSize } from './utils'
+import { useAuth } from '../../auth-context'
 
 const SOCKET_URL = BACKEND_URL + 'kingdomino'
 
@@ -32,9 +33,6 @@ const initialMap: KingdominoMap = {
 }
 
 const Kingdomino: React.FC = () => {
-  const location = useLocation()
-  const searchParams = new URLSearchParams(location.search)
-  const playerId = searchParams.get('playerId')
   const { kingdominoId } = useParams<{ kingdominoId: string }>()
 
   const [turn, setTurn] = useState<Turn | null>(null)
@@ -45,20 +43,22 @@ const Kingdomino: React.FC = () => {
   const [endgameResults, setEndgameResults] = useState<PlayerData[] | null>(null)
 
   const size = useWindowSize()
+  // TODO okosabb méret: mapsize, magasság
   const baseSize = Math.max(64, Math.min(256, size.width * 0.07))
 
   const { showToast } = useToast()
+  const { userId } = useAuth()
 
   // Socket ref, hogy ne hozzon létre minden rendernél újat
   const socketRef = useRef<typeof Socket | null>(null)
 
   useEffect(() => {
-    if (!playerId || !kingdominoId) return
+    if (!kingdominoId) return
     const socket = io(SOCKET_URL)
     socketRef.current = socket
 
     // Csatlakozás a játékhoz
-    socket.emit('join-game', { kingdominoId, playerId })
+    socket.emit('join-game', { kingdominoId, userId })
 
     // Játékállapot fogadása
     socket.on('game-state', (gameState: GameState) => {
@@ -71,13 +71,13 @@ const Kingdomino: React.FC = () => {
     return () => {
       socket.disconnect()
     }
-  }, [playerId, kingdominoId])
+  }, [userId, kingdominoId])
 
   // Dominó választás küldése szerverre
   const chooseDomino = (drawnDominoId: number) => {
     socketRef.current?.emit(
       'choose-domino',
-      { kingdominoId, drawnDominoId, playerId },
+      { kingdominoId, drawnDominoId, userId },
       (response: { success: boolean; message?: string }) => {
         if (!response.success && response.message) {
           showToast(response.message, 'error')
@@ -89,7 +89,7 @@ const Kingdomino: React.FC = () => {
   // Dominó lerakás küldése szerverre - ez endpointtal megy, ez csak a többieknek szól (hibakezelés sincs)
   // TODO? ezt is átszervezni ide
   const placeDomino = (/*x: number, y: number, rot: number, inTrash: boolean, drawnDominoId: number*/) => {
-    socketRef.current?.emit('place-domino', { kingdominoId, playerId })
+    socketRef.current?.emit('place-domino', { kingdominoId })
   }
 
   // map lekérdezése
@@ -99,11 +99,11 @@ const Kingdomino: React.FC = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ playerId, kingdominoId }),
+      body: JSON.stringify({ userId, kingdominoId }),
     })
       .then((response) => response.json())
       .then((data) => setMap(data.map))
-  }, [turn, playerId, kingdominoId])
+  }, [turn, userId, kingdominoId])
 
   // lerakandó dominó beállítása
   useEffect(() => {

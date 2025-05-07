@@ -9,16 +9,16 @@ export const dominoEndpoints: Endpoint[] = [
     path: basePath + '/choose',
     handler: async (req, res) => {
       try {
-        const { drawnDominoId, playerId } = req.body
+        const { drawnDominoId, userId } = req.body
         if (!drawnDominoId) {
           throw new Error('Dominó megadása kötelező')
         }
-        if (!playerId) {
-          throw new Error('PlayerId megadása kötelező')
+        if (!userId) {
+          throw new Error('UserId megadása kötelező')
         }
 
         //TODO !! validation, a drawnDomino tényleg saját kingdominoban van? placere szintén
-        const nextTurn = await chooseDomino(drawnDominoId, playerId)
+        const nextTurn = await chooseDomino(drawnDominoId, userId)
 
         res.status(201).json({ message: 'Dominó kiválasztása sikerült', turn: nextTurn })
       } catch (error) {
@@ -35,8 +35,8 @@ export const dominoEndpoints: Endpoint[] = [
       try {
         // TODO ! code cleanup, mi ez a hányás
         // TODO !! validation, ez a dominó jön beépítésre? getturn visszatérése bővítés
-        const { drawnDominoId, playerId, x, y, rot, inTrash } = req.body
-        const { message, map, points } = await placeDomino(drawnDominoId, playerId, x, y, rot, inTrash)
+        const { drawnDominoId, userId, x, y, rot, inTrash } = req.body
+        const { message, map, points } = await placeDomino(drawnDominoId, userId, x, y, rot, inTrash)
 
         res.status(201).json({
           message,

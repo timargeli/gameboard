@@ -3,6 +3,7 @@ import { DominoToPlace } from '../kingdom/types'
 import { BACKEND_URL } from '../../../types'
 import { useToast } from '../../../toast-context'
 import { Turn } from '../turn-sign/types'
+import { useAuth } from '../../../auth-context'
 
 type TrashProps = {
   dominoToPlace: DominoToPlace | null
@@ -13,6 +14,7 @@ type TrashProps = {
 
 export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn, baseSize }) => {
   const { showToast } = useToast()
+  const { userId } = useAuth()
 
   const handleClick = () => {
     if (!dominoToPlace) return
@@ -24,7 +26,7 @@ export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn, 
       body: JSON.stringify({
         inTrash: true,
         drawnDominoId: dominoToPlace?.drawnDominoId,
-        playerId: turn?.player?.id,
+        userId,
       }),
     })
       .then((response) => {

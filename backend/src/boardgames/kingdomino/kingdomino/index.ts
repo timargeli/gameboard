@@ -7,9 +7,10 @@ import {
 } from '../../../database/database'
 import { KdKingdominoDomino, KdPlayer, Kingdomino } from '../../../database/generated'
 import { getDomino, endGame } from '../../../database/utils'
+import { User } from '../types'
 import { KingdominoMap } from './kingdomino-map'
 import { BulkInsertKDKingdominoDomino, Turn } from './types'
-import { getGameId, getGameStateString, getPlayer } from './utils'
+import { getGameId, getGameStateString, getPlayer, getPlayerFromUser } from './utils'
 
 export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   if (!kingdomino) {
@@ -63,7 +64,7 @@ export const draw = async (kingdomino: Kingdomino['id'] | Kingdomino) => {
   }
 }
 
-export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'], player: KdPlayer['id']) => {
+export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'], userId: User['id']) => {
   const drawnDomino = await kd_kingdomino_dominoTable(db).findOne({ id: kingdominoDominoId })
   if (!drawnDomino) {
     throw new Error('Nincs ilyen dominó')
@@ -74,14 +75,17 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
   if (drawnDomino.chosen_by_player) {
     throw new Error('Ezt a dominót már választotta valaki')
   }
+
+  const player = await getPlayerFromUser(userId, drawnDomino.kingdomino_id)
+
   const turn = await getTurn(drawnDomino.kingdomino_id)
-  if (turn.player.id !== player) {
+  if (turn.player.id !== player.id) {
     throw new Error('Nem a te köröd van')
   }
   if (turn.action !== 'choose') {
     throw new Error('Most nem lehet dominót választani')
   }
-  await kd_kingdomino_dominoTable(db).update({ id: kingdominoDominoId }, { chosen_by_player: player })
+  await kd_kingdomino_dominoTable(db).update({ id: kingdominoDominoId }, { chosen_by_player: player.id })
   // Megnézzük hogy kell-e húzni
   // Csak akkor kell, ha az első 4 dominó kiválasztása után vagyunk
   const drawnDominos = await kd_kingdomino_dominoTable(db)
@@ -97,7 +101,7 @@ export const chooseDomino = async (kingdominoDominoId: KdKingdominoDomino['id'],
 
 export const placeDomino = async (
   drawnDominoId: number,
-  playerId: number,
+  userId: number,
   x: number,
   y: number,
   rot: number,
@@ -106,8 +110,8 @@ export const placeDomino = async (
   if (!drawnDominoId) {
     throw new Error('Dominó megadása kötelező')
   }
-  if (!playerId) {
-    throw new Error('PlayerId megadása kötelező')
+  if (!userId) {
+    throw new Error('UserId megadása kötelező')
   }
   const drawnDomino = await kd_kingdomino_dominoTable(db).findOne({ id: drawnDominoId })
   if (!drawnDomino) {
@@ -116,16 +120,15 @@ export const placeDomino = async (
   if (!drawnDomino.kingdomino_id) {
     throw new Error('Nincs kingdomino a dominón')
   }
-  if (drawnDomino.chosen_by_player !== playerId) {
+
+  const player = await getPlayerFromUser(userId, drawnDomino.kingdomino_id)
+
+  if (drawnDomino.chosen_by_player !== player.id) {
     throw new Error('Nem a te dominód')
-  }
-  const player = await kd_playerTable(db).findOne({ id: playerId })
-  if (!player) {
-    throw new Error('Nem található játékos a megadott idhoz')
   }
 
   const turn = await getTurn(drawnDomino.kingdomino_id)
-  if (turn.player.id !== playerId) {
+  if (turn.player.id !== player.id) {
     throw new Error('Nem a te köröd van')
   }
   if (turn.action !== 'place') {

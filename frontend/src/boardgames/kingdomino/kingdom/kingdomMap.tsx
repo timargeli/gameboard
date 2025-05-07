@@ -3,6 +3,7 @@ import { BACKEND_URL } from '../../../types'
 import { DominoToPlace, KingdominoMap } from './types'
 import { Turn } from '../turn-sign/types'
 import { useToast } from '../../../toast-context'
+import { useAuth } from '../../../auth-context'
 
 type KingdomMapProps = {
   map: KingdominoMap
@@ -28,6 +29,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   const { width, height, minX, minY } = map.dimensions
 
   const { showToast } = useToast()
+  const { userId } = useAuth()
 
   // TODO szépség: maxnál ne lehessen nagyobb
   // Növeljük a gridet minden irányban kettővel, ha még nem érte el a maxot
@@ -59,7 +61,7 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
         y,
         rot: dominoToPlace?.rot,
         drawnDominoId: dominoToPlace?.drawnDominoId,
-        playerId: turn?.player?.id,
+        userId,
       }),
     })
       .then((response) => {
@@ -104,6 +106,8 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
               boxSizing: 'border-box',
               background: '#fafafa',
               cursor: 'pointer',
+              overflow: 'hidden',
+              overscrollBehavior: 'contain',
             }}
             onClick={() => handleCellClick(x, y)}
             onMouseEnter={() => setHoveredCell({ x, y })}
