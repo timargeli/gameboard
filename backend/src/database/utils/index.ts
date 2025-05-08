@@ -50,7 +50,6 @@ export const endGame = async (gameId?: Game['id'] | null) => {
   if (!gameId) {
     throw new Error('gameId megadása kötelező')
   }
-  // TODO egyéb ending logika
   const res = await lobbyTable(db).update({ game: gameId }, { state: GameStateString.ended })
   if (!res.length) {
     throw new Error('Nincs ilyen gameId-jú lobby')

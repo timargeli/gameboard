@@ -1,4 +1,3 @@
-// pages/CreateLobby.tsx
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/button'
@@ -19,7 +18,7 @@ export const CreateLobby: React.FC = () => {
   const navigate = useNavigate()
   const { showToast } = useToast()
 
-  // Ha játékot váltunk, reseteljük a min/max player választást
+  // reset stuff on hame change
   const handleGameChange = (gName: string) => {
     setGameName(gName)
     setMinPlayers('')
@@ -38,7 +37,7 @@ export const CreateLobby: React.FC = () => {
 
     let gameOptionsId = gameOptions
 
-    // Ha még nincs gameOptions, akkor előbb azt hozzuk létre
+    // create gameOptions if needed
     if (!gameOptionsId) {
       try {
         const response = await fetch(`${BACKEND_URL}api/game-options/create`, {
@@ -64,7 +63,6 @@ export const CreateLobby: React.FC = () => {
       }
     }
 
-    // Most már biztosan van gameOptionsId
     try {
       const response = await fetch(`${BACKEND_URL}api/lobby/create`, {
         method: 'POST',
@@ -89,7 +87,6 @@ export const CreateLobby: React.FC = () => {
     }
   }
 
-  // Létrehozás gomb csak akkor aktív, ha minden ki van választva
   const canCreate = !!gameName && !!minPlayers && !!maxPlayers && !!boardgameOptions
 
   console.log('maxplayers', maxPlayers)
@@ -142,7 +139,7 @@ export const CreateLobby: React.FC = () => {
           padding: '0 32px',
         }}
       >
-        {/* Játék kiválasztása */}
+        {/* game name */}
         <div style={{ marginBottom: 24, textAlign: 'left' }}>
           <div style={{ color: '#fff', fontSize: 18, marginBottom: 8 }}>Játék:</div>
           <Dropdown
@@ -191,7 +188,7 @@ export const CreateLobby: React.FC = () => {
         )}
       </div>
 
-      {/* Gombok legalul */}
+      {/* buttons */}
       <div
         style={{
           display: 'flex',
@@ -202,7 +199,7 @@ export const CreateLobby: React.FC = () => {
         }}
       >
         <Button onClick={handleCreateLobby} disabled={!canCreate}>
-          Create lobby
+          Lobbi létrehozása
         </Button>
         <Button onClick={() => navigate('/lobbies')} variant="delete">
           Vissza

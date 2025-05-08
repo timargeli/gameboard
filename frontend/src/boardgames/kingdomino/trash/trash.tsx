@@ -1,9 +1,10 @@
 import React from 'react'
 import { DominoToPlace } from '../kingdom/types'
-import { BACKEND_URL } from '../../../types'
+import { BACKEND_URL, DefaultColors } from '../../../types'
 import { useToast } from '../../../toast-context'
 import { Turn } from '../turn-sign/types'
 import { useAuth } from '../../../auth-context'
+import { translateColor } from '../utils'
 
 type TrashProps = {
   dominoToPlace: DominoToPlace | null
@@ -42,6 +43,7 @@ export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn, 
         showToast(error.message || 'Ismeretlen hiba történt!', 'error')
       })
   }
+
   return (
     <div
       style={{
@@ -50,7 +52,7 @@ export const Trash: React.FC<TrashProps> = ({ placeDomino, dominoToPlace, turn, 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#eee',
+        background: translateColor(turn?.player.color || DefaultColors.BROWN),
         borderRadius: baseSize * 0.1,
         boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
         border: '2px solid #888',

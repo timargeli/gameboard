@@ -1,5 +1,5 @@
-import { KdKingdom, KdPlayer } from '../../../database/generated'
-import { CellType } from '../types'
+import { KdKingdom } from '../../../database/generated'
+import { CellType, KDPlayer } from '../types'
 
 export type BulkInsertKDKingdominoDomino = {
   kingdomino_id: number
@@ -54,7 +54,7 @@ export type Territory = {
 }
 
 export type Turn = {
-  player: KdPlayer
+  player: PlayerWithUser
   action: 'place' | 'choose'
   drawnDomino?: {
     value: number
@@ -63,7 +63,6 @@ export type Turn = {
   }
 }
 
-export type TurnWithPlayer = {
-  player: KdPlayer
-  action: 'place' | 'choose'
+export type PlayerWithUser = KDPlayer & {
+  name: string
 }

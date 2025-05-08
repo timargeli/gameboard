@@ -32,7 +32,7 @@ export const lobbyEndpoints: Endpoint[] = [
           game_options: gameOptions,
           min_players: minPlayers,
           max_players: maxPlayers,
-          players: [], //TODO add self user
+          players: [],
           date_created: new Date(),
         }
         const newLobby = await lobbyTable(db).insert(lobby)
@@ -64,33 +64,6 @@ export const lobbyEndpoints: Endpoint[] = [
         if (lobby.state !== 'waiting') {
           throw new Error('Game already ' + lobby.state)
         }
-
-        const [result] = await lobbyTable(db).update(
-          { id: lobbyId },
-          { players: (lobby.players || []).concat(userId) },
-        )
-
-        res.status(201).json({ message: 'Joined lobby', lobby: result })
-      } catch (error) {
-        console.log('Error joining lobby')
-        console.log(error)
-        res.status(500).json({ message: 'Error joining lobby', error: (error as any)?.message })
-      }
-    },
-  },
-  // TODO delete temp
-  {
-    endpointType: 'post',
-    path: basePath + '/join-temp',
-    handler: async (req, res) => {
-      try {
-        const { lobbyId, userId } = req.body
-
-        if (!userId) {
-          throw new Error('UserId megadása kötelező')
-        }
-
-        const lobby = await getLobby(lobbyId)
 
         const [result] = await lobbyTable(db).update(
           { id: lobbyId },

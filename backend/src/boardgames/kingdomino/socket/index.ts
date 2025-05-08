@@ -8,7 +8,7 @@ export const setupKingdominoSockets = (io: Server) => {
     console.log('Új kliens csatlakozott kingdominohoz:', socket.id)
 
     socket.on('join-game', async ({ kingdominoId, userId }) => {
-      socket.join(kingdominoId) // <-- szoba az adott játékhoz
+      socket.join(kingdominoId) // szoba az adott játékhoz
       const gameState = await getGameState(kingdominoId)
       io.of('/kingdomino').to(kingdominoId).emit('game-state', gameState)
     })
@@ -19,10 +19,10 @@ export const setupKingdominoSockets = (io: Server) => {
         await chooseDomino(Number(drawnDominoId), Number(userId))
         const gameState = await getGameState(Number(kingdominoId))
         io.of('/kingdomino').to(kingdominoId).emit('game-state', gameState)
-        // Sikeres válasz a kliensnek
+        // Nincs hiba
         callback && callback({ success: true })
       } catch (error) {
-        // Hiba válasz a kliensnek
+        // Hiba válasz
         callback && callback({ success: false, message: (error as Error).message })
       }
     })

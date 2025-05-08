@@ -9,7 +9,6 @@ type BulkInsertKDDomino = {
   right_cell_crowns: number
 }
 
-// TODO img
 const dominos: BulkInsertKDDomino[] = [
   {
     value: 1,

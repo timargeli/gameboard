@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { KingdomMap } from './kingdom/kingdomMap'
 import { TurnSign } from './turn-sign/turnSign'
 import { Topdecks } from './topdeck/topdecks'
-import { useParams } from 'react-router-dom'
-import { BACKEND_URL } from '../../types'
+import { useNavigate, useParams } from 'react-router-dom'
+import { BACKEND_URL, DefaultColors } from '../../types'
 import { Turn } from './turn-sign/types'
 import { DominoToPlace, KingdominoMap } from './kingdom/types'
 import io, { Socket } from 'socket.io-client'
@@ -12,8 +12,9 @@ import { Topdeck } from './topdeck/types'
 import { useToast } from '../../toast-context'
 import { WinnerBoard } from './winner-board/winnerBoard'
 import { Trash } from './trash/trash'
-import { useWindowSize } from './utils'
+import { translateColor, useWindowSize } from './utils'
 import { useAuth } from '../../auth-context'
+import { Button } from '../../components/button'
 
 const SOCKET_URL = BACKEND_URL + 'kingdomino'
 
@@ -47,6 +48,7 @@ const Kingdomino: React.FC = () => {
   const baseSize = Math.max(64, Math.min(256, size.width * 0.07))
 
   const { showToast } = useToast()
+  const navigate = useNavigate()
   const { userId } = useAuth()
 
   // Socket ref, hogy ne hozzon létre minden rendernél újat
@@ -117,18 +119,50 @@ const Kingdomino: React.FC = () => {
   return (
     <div
       style={{
+        width: '100vw',
         minHeight: '100vh',
-        backgroundColor: '#f5e1b7',
-        backgroundImage: 'url("/boardgames/kingdomino/wood-texture.png")',
-        backgroundRepeat: 'repeat',
-        backgroundSize: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center', // TurnSign középre
-        gap: 24, // távolság a sorok között
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 24,
       }}
     >
-      <TurnSign turn={turn} state={gameStateString} baseSize={baseSize} />
+      {/* Turnsign és vissza gomb*/}
+      <div
+        style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        {/* TurnSign középen */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+          <TurnSign turn={turn} state={gameStateString} baseSize={baseSize} />
+        </div>
+        {/* Vissza gomb jobb felső sarokban */}
+        <div
+          style={{
+            position: 'relative',
+            right: 24,
+            top: 0,
+          }}
+        >
+          <Button
+            onClick={() => navigate('/lobbies')}
+            background={
+              gameStateString === 'ended'
+                ? DefaultColors.BROWN
+                : translateColor(turn?.player.color || DefaultColors.BROWN)
+            }
+          >
+            &#8592;
+          </Button>
+        </div>
+      </div>
       <div
         style={{
           display: 'flex',
@@ -148,12 +182,17 @@ const Kingdomino: React.FC = () => {
         />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           {!endgameResults ? (
-            <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} baseSize={baseSize} />
+            <Topdecks topdecks={topdecks} turn={turn} chooseDomino={chooseDomino} baseSize={baseSize * 0.9} />
           ) : (
             <WinnerBoard winners={endgameResults} baseSize={baseSize}></WinnerBoard>
           )}
           {dominoToPlace && (
-            <Trash dominoToPlace={dominoToPlace} turn={turn} placeDomino={placeDomino} baseSize={baseSize} />
+            <Trash
+              dominoToPlace={dominoToPlace}
+              turn={turn}
+              placeDomino={placeDomino}
+              baseSize={baseSize * 0.7}
+            />
           )}
         </div>
       </div>

@@ -2,10 +2,9 @@ import {
   db,
   kd_kingdom_dominoTable,
   kd_kingdomino_dominoTable,
-  kd_playerTable,
   kingdominoTable,
 } from '../../../database/database'
-import { KdKingdominoDomino, KdPlayer, Kingdomino } from '../../../database/generated'
+import { KdKingdominoDomino, Kingdomino } from '../../../database/generated'
 import { getDomino, endGame } from '../../../database/utils'
 import { User } from '../types'
 import { KingdominoMap } from './kingdomino-map'
@@ -190,8 +189,6 @@ export const placeDomino = async (
   // olcsóbb lenne beépítős függvény is, mint az egészet újra felépíteni
   const points = await kingdominoMap.loadAndBuild(player.kingdom)
 
-  // temporary, prints map to console
-  kingdominoMap.printMap()
   const border = kingdominoMap.getKingdomBorder()
 
   return {

@@ -1,4 +1,3 @@
-// pages/Lobbies.tsx
 import React, { useEffect, useRef, useState } from 'react'
 import { LobbyItem } from '../components/lobbyItem'
 import { BACKEND_URL, LobbyItem as Lobby } from '../types'
@@ -103,7 +102,7 @@ export const Lobbies: React.FC = () => {
         borderRadius: 18,
         boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
         border: '4px solid white',
-        minWidth: 340,
+        minWidth: 480,
         maxWidth: 520,
         textAlign: 'center',
         fontFamily: 'Montserrat, Arial, sans-serif',

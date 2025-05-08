@@ -4,24 +4,28 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children: React.ReactNode
   variant?: 'default' | 'delete'
   disabled?: boolean
+  background?: string
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'default',
   disabled = false,
+  background = '',
   ...props
 }) => (
   <button
     style={{
-      background: disabled
-        ? variant === 'delete'
-          ? '#f8bbbb'
-          : '#ffe066'
-        : variant === 'delete'
-        ? '#e53935'
-        : '#ffd700',
-      color: disabled ? '#aaa' : variant === 'delete' ? '#fff' : '#333',
+      background:
+        background ||
+        (disabled
+          ? variant === 'delete'
+            ? '#f8bbbb'
+            : '#ffe066'
+          : variant === 'delete'
+          ? '#e53935'
+          : '#ffd700'),
+      color: disabled ? '#aaa' : variant === 'delete' || background ? '#fff' : '#333',
       border: '2px solid #fff',
       borderRadius: 12,
       padding: '12px 32px',

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Topdeck } from './types'
 import { Turn } from '../turn-sign/types'
+import { useToast } from '../../../toast-context'
 
 type DominoProps = {
   domino: Topdeck
@@ -10,8 +11,13 @@ type DominoProps = {
 }
 
 export const Domino: React.FC<DominoProps> = ({ domino, turn, chooseDomino, baseSize }) => {
+  const { showToast } = useToast()
+
   const handleClick = async () => {
-    if (domino.color) return // ha van color, ne csináljon semmit
+    if (domino.color) {
+      showToast('Ezt a dominót már választotta valaki', 'error')
+      return
+    }
     chooseDomino(domino.id)
   }
 

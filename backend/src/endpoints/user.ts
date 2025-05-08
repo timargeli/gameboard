@@ -23,7 +23,7 @@ export const userEndpoints: Endpoint[] = [
         let newUser
         // Creating a new one if nothing has been found
         if (!existingUser) {
-          newUser = await usersTable(db).insert({ name, password, language })
+          ;[newUser] = await usersTable(db).insert({ name, password, language })
         }
         res
           .status(201)

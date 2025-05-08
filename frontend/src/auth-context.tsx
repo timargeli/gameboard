@@ -45,7 +45,7 @@ export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
 
   if (!userId) {
-    // Átirányítás loginra, megjegyezve honnan jött
+    // Átirányítás loginra ha nincs userId
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

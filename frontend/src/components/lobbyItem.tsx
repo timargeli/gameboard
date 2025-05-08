@@ -74,14 +74,22 @@ export const LobbyItem: React.FC<LobbyItemProps> = ({
       </div>
       {/* Players */}
       <div
-        style={{ fontSize: 16, color: '#555', margin: '4px 0', alignItems: 'normal', wordBreak: 'break-all' }}
+        style={{
+          fontSize: 16,
+          color: '#555',
+          margin: '4px 0',
+          alignItems: 'normal',
+          wordBreak: 'break-all',
+          textAlign: 'left',
+        }}
       >
         {player_names}
       </div>
       {/* Player cnt and date */}
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, color: '#555' }}>
         <span>
-          {players.length || 0} / {min_players}-{max_players}
+          {players.length || 0} /{' '}
+          {min_players === max_players ? min_players : `${min_players}-${max_players}`}
         </span>
         <span>{dateString}</span>
       </div>

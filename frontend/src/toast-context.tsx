@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useCallback, useState, ReactNode } from 'react'
+import { createContext, useContext, useCallback, useState, ReactNode } from 'react'
 
 type ToastType = 'success' | 'error' | 'info'
 type Toast = { id: number; message: string; type: ToastType }
@@ -19,7 +19,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     setToasts((toasts) => [...toasts, { id, message, type }])
     setTimeout(() => {
       setToasts((toasts) => toasts.filter((toast) => toast.id !== id))
-    }, 3000) // 3 másodpercig látszik
+    }, 3000)
   }, [])
 
   return (

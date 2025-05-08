@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { DefaultColors } from '../../../types'
 import { kingdominoOptionLabels } from './labels'
 

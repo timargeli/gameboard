@@ -51,7 +51,7 @@ export const kingdomEndpoints: Endpoint[] = [
         res.status(201).json({
           message: 'Map lekérdezése sikerült',
           map: { ...kingdomMap, dimensions: border },
-        }) //TODO lodash pick csak az a négy property ami kell
+        })
       } catch (error) {
         console.log('Error getting map')
         console.log(error)

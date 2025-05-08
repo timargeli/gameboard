@@ -3,6 +3,7 @@ import { translateColor } from '../utils'
 import { Turn } from './types'
 import { GameStateString } from '../types'
 import { DefaultColors } from '../../../types'
+import { useAuth } from '../../../auth-context'
 
 type TurnSignProps = {
   baseSize: number
@@ -11,6 +12,14 @@ type TurnSignProps = {
 }
 
 export const TurnSign: React.FC<TurnSignProps> = ({ baseSize, turn, state }) => {
+  const { userId } = useAuth()
+
+  const getTurnString = (state: GameStateString, turn: Turn) => {
+    if (state === 'ended') return 'A játéknak vége'
+    if (userId === turn.player.user) return turn.action === 'choose' ? 'Te választasz' : 'Te raksz'
+    return `${turn.player.name} ${turn.action === 'choose' ? 'választ' : 'rak'}`
+  }
+
   if (!turn) return <div style={{ width: baseSize * 2, height: baseSize / 2 }} />
 
   return (
@@ -34,14 +43,12 @@ export const TurnSign: React.FC<TurnSignProps> = ({ baseSize, turn, state }) => 
         transition: 'box-shadow 0.3s',
         position: 'relative',
         animation: 'pop 0.5s',
-        whiteSpace: 'nowrap', // egy sorba kényszeríti a szöveget
+        whiteSpace: 'nowrap',
         padding: `0 ${baseSize / 3}px`,
       }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: baseSize / 5, opacity: 0.9 }}>
-          {state === 'ended' ? 'A játéknak vége' : `It's player ${turn.player.id}'s turn to ${turn.action}`}
-        </span>
+        <span style={{ fontSize: baseSize / 5, opacity: 0.9 }}>{getTurnString(state, turn)}</span>
       </span>
     </div>
   )

@@ -1,7 +1,5 @@
-import { db, sql } from '../../../database/database'
 import { Endpoint } from '../../../types'
 import { getTurn } from '../kingdomino'
-import { Topdeck } from '../kingdomino/types'
 import { getTopdecks } from '../kingdomino/utils'
 
 const basePath = '/kingdomino'

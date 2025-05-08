@@ -3,6 +3,7 @@ import {
   db,
   kd_kingdomTable,
   kd_playerTable,
+  kingdomino_optionsTable,
   kingdominoTable,
   sql,
 } from '../../../database/database'
@@ -31,7 +32,12 @@ const initBoardGame = async (lobby: Lobby, kingdominoOptions: KingdominoOptions)
     if (!lobby.players?.length) {
       throw new Error('Nincsenek játékosok a lobbyban')
     }
-    const isBigMap = lobby.players.length === 2 && kingdominoOptions.big_kingdom_enabled
+    // Kikapcsoljuk a big kingdom beállítást, ha nem csak két játékos van
+    if (kingdominoOptions.big_kingdom_enabled && lobby.players.length > 2) {
+      await kingdomino_optionsTable(db).update({ id: kingdominoOptions.id }, { big_kingdom_enabled: false })
+      kingdominoOptions.big_kingdom_enabled = false
+    }
+    const isBigMap = kingdominoOptions.big_kingdom_enabled
     const deckSize = lobby.players.length * 12 * (isBigMap ? 2 : 1)
     // create deck, 1-48 ig array, randomizaljuk, vesszük utsó decksize elemét
     const deck = [...Array(48).keys()]

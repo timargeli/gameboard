@@ -1,4 +1,3 @@
-// pages/Lobby.tsx
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getStateString } from '../components/lobbyItem'
@@ -34,7 +33,7 @@ export const Lobby: React.FC = () => {
     return () => {
       socket.disconnect()
     }
-  }, [])
+  }, [lobbyId])
 
   useEffect(() => {
     if (['ended', 'in_game'].includes(lobby?.state || '')) {
@@ -110,14 +109,14 @@ export const Lobby: React.FC = () => {
         flexDirection: 'column',
       }}
     >
-      {/* Felső sor: balra game_name, jobbra státusz */}
+      {/* game name és státusz */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '0 32px',
-          marginBottom: 28, // nagyobb térköz
+          marginBottom: 28,
         }}
       >
         <span style={{ fontSize: 32, fontWeight: 700, color: DefaultColors.YELLOW, letterSpacing: 2 }}>

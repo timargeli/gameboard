@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { DefaultColors } from '../../types'
 
 export const BASE_SIZE = 96
@@ -19,8 +19,6 @@ export const translateColor = (color: string) => {
       return 'black'
   }
 }
-
-const BASE_DOMINO_SIZE = 96
 
 export const useWindowSize = () => {
   const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })

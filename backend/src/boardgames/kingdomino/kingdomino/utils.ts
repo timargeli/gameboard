@@ -5,13 +5,12 @@ import {
   kingdomino_optionsTable,
   boardgameTable,
   gameTable,
-  kd_playerTable,
   sql,
 } from '../../../database/database'
 import { KdPlayer, Kingdomino } from '../../../database/generated'
 import { getEndgameResults } from '../game'
 import { Cell, CellType, GameState, GameStateString, User } from '../types'
-import { PlacedDominoJoined, Topdeck } from './types'
+import { PlacedDominoJoined, PlayerWithUser, Topdeck } from './types'
 
 // Egy dominóból két cellát számol, forgatás és pozicó alapján
 export const createCellData = (pdom: PlacedDominoJoined) => {
@@ -107,10 +106,19 @@ export const getGameId = async (kingdominoId?: Kingdomino['id'] | null) => {
 }
 
 export const getPlayer = async (playerId: KdPlayer['id']) => {
-  const player = await kd_playerTable(db).findOne({ id: playerId })
+  const player = (
+    await db.query(sql`
+    SELECT p.*, u.name
+    FROM kd_player p
+    JOIN users u on p.user = u.id
+    WHERE p.id = ${playerId};
+  `)
+  )[0] as PlayerWithUser
+
   if (!player) {
     throw new Error('Nincs ilyen id-jú player: ' + playerId)
   }
+
   return player
 }
 

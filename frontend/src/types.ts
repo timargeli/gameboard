@@ -6,7 +6,7 @@ export enum DefaultColors {
   BLUE = '#2563eb',
   GREEN = '#16a34a',
   YELLOW = '#facc15',
-  PINK = '#ec4899',
+  PINK = '#e57373',
   BROWN = '#6d4c29',
   GOLD = '#ffd700',
   RED = '#e53935',

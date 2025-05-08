@@ -31,7 +31,6 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
   const { showToast } = useToast()
   const { userId } = useAuth()
 
-  // TODO szépség: maxnál ne lehessen nagyobb
   // Növeljük a gridet minden irányban kettővel, ha még nem érte el a maxot
   const gridWidth = map.sideSize === width ? width : width + 4
   const gridHeight = map.sideSize === height ? height : height + 4
@@ -79,16 +78,20 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
       })
   }
 
+  const maxGrid = Math.max(gridWidth, gridHeight)
+  const scale = maxGrid > 5 ? 5 / maxGrid : 1 // pl. 10 cellánál nem skáláz, felette arányosan csökkent
+  const scaledBaseSize = Math.round(baseSize * scale)
+
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${gridWidth}, ${baseSize}px)`,
-        gridTemplateRows: `repeat(${gridHeight}, ${baseSize}px)`,
+        gridTemplateColumns: `repeat(${gridWidth}, ${scaledBaseSize}px)`,
+        gridTemplateRows: `repeat(${gridHeight}, ${scaledBaseSize}px)`,
         gap: '0px',
         position: 'relative',
-        width: baseSize * gridWidth,
-        height: baseSize * gridHeight,
+        width: scaledBaseSize * gridWidth,
+        height: scaledBaseSize * gridHeight,
         border: '2px solid #333',
       }}
     >
@@ -100,8 +103,8 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           <div
             key={`${x},${y}`}
             style={{
-              width: baseSize,
-              height: baseSize,
+              width: scaledBaseSize,
+              height: scaledBaseSize,
               border: '1px solid #ccc',
               boxSizing: 'border-box',
               background: '#fafafa',
@@ -127,10 +130,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`Domino ${dominoToPlace.value}`}
           style={{
             position: 'absolute',
-            left: (hoveredCell.x - startX) * baseSize,
-            top: (hoveredCell.y - startY) * baseSize,
-            width: 2 * baseSize,
-            height: baseSize,
+            left: (hoveredCell.x - startX) * scaledBaseSize,
+            top: (hoveredCell.y - startY) * scaledBaseSize,
+            width: 2 * scaledBaseSize,
+            height: scaledBaseSize,
             opacity: 0.5,
             pointerEvents: 'none',
             transform: `rotate(${-dominoToPlace.rot * 90}deg)`,
@@ -148,10 +151,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`Domino ${domino.value}`}
           style={{
             position: 'absolute',
-            left: (domino.x - startX) * baseSize,
-            top: (domino.y - startY) * baseSize,
-            width: 2 * baseSize,
-            height: baseSize,
+            left: (domino.x - startX) * scaledBaseSize,
+            top: (domino.y - startY) * scaledBaseSize,
+            width: 2 * scaledBaseSize,
+            height: scaledBaseSize,
             transform: `rotate(${-domino.rot * 90}deg)`,
             transformOrigin: '25% 50%',
             pointerEvents: 'none',
@@ -166,10 +169,10 @@ export const KingdomMap: React.FC<KingdomMapProps> = ({
           alt={`${map.color} castle`}
           style={{
             position: 'absolute',
-            left: -startX * baseSize,
-            top: -startY * baseSize,
-            width: baseSize,
-            height: baseSize,
+            left: -startX * scaledBaseSize,
+            top: -startY * scaledBaseSize,
+            width: scaledBaseSize,
+            height: scaledBaseSize,
             pointerEvents: 'none',
           }}
         />
