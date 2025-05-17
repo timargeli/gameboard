@@ -38,14 +38,12 @@ export const kingdomEndpoints: Endpoint[] = [
         const { userId, kingdominoId } = req.body
 
         const player = await getPlayerFromUser(userId, kingdominoId)
-
-        const kingdomId = (await kd_playerTable(db).findOne({ id: player.id }))?.kingdom
-        if (!kingdomId) {
+        if (!player.kingdom) {
           throw new Error('Nincs kingdom a playerhez: ' + player.id)
         }
 
         const kingdomMap = new KingdominoMap()
-        await kingdomMap.loadAndBuild(kingdomId)
+        await kingdomMap.loadAndBuild(player.kingdom)
         const border = kingdomMap.getKingdomBorder()
 
         res.status(201).json({

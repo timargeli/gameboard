@@ -105,6 +105,9 @@ const Kingdomino: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => setMap(data.map))
+      .catch((error) => {
+        showToast(error.message || 'Ismeretlen hiba történt!', 'error')
+      })
   }, [turn, userId, kingdominoId])
 
   // lerakandó dominó beállítása
